@@ -4,20 +4,18 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>mybox — Дашборд-план</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
+<style>*{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#1a1a18;min-height:100vh}
 .app{max-width:1300px;margin:0 auto;padding:24px 20px}
 .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px}
 .top-left{display:flex;align-items:center;gap:12px}
-.logo-img{height:36px;width:auto;display:block}
+.logo-img{height:40px;width:auto;display:block;border-radius:6px}
 .logo-text{font-size:20px;font-weight:600;color:#1a1a18;letter-spacing:-.3px}
 .logo-text em{color:#D85A30;font-style:normal}
+.top-right{display:flex;align-items:center;gap:10px}
 .date-badge{font-size:12px;color:#888;background:#f7f6f2;border:1px solid #e8e5dd;border-radius:8px;padding:5px 12px}
-
+.sync-info{font-size:11px;color:#3b6d11;background:#eaf3de;border:1px solid #97c459;border-radius:8px;padding:4px 10px}
 .section-title{font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
-
-/* ── Загальна статистика ── */
 .total-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px}
 .total-grid-sq{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:8px}
 @media(max-width:700px){.total-grid,.total-grid-sq,.loc-stats{grid-template-columns:repeat(2,1fr)}}
@@ -26,11 +24,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tstat-v{font-size:22px;font-weight:600;color:#1a1a18}
 .tstat-v.red{color:#A32D2D}.tstat-v.grn{color:#3B6D11}.tstat-v.amb{color:#D85A30}.tstat-v.blue{color:#1a6fb5}
 .fill-bar{height:5px;border-radius:3px;background:#e0ddd5;overflow:hidden;margin-top:6px}
-.fill-bar-inner{height:100%;border-radius:3px;background:#D85A30}
-
+.fill-bar-inner{height:100%;border-radius:3px;background:#D85A30;transition:width .6s}
 .section-sep{margin:18px 0 10px;border:none;border-top:1px solid #f0ede5}
-
-/* ── По локаціях ── */
 .loc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
 .lstat{background:#f7f6f2;border:1px solid #ece9e0;border-radius:12px;padding:14px 16px}
 .lstat-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -41,30 +36,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .lstat-row span.red{color:#A32D2D}.lstat-row span.grn{color:#3B6D11}.lstat-row span.amb{color:#D85A30}
 .lstat-divider{border:none;border-top:1px solid #e8e5dd;margin:8px 0}
 .lstat-bar{height:4px;border-radius:2px;background:#e0ddd5;overflow:hidden;margin-top:8px}
-.lstat-bar-inner{height:100%;border-radius:2px;background:#D85A30}
-
-/* ── Вкладки ── */
+.lstat-bar-inner{height:100%;border-radius:2px;background:#D85A30;transition:width .6s}
 .tabs{display:flex;gap:4px;background:#f0ede6;border-radius:12px;padding:4px;margin-bottom:12px;width:fit-content}
 .tab{padding:7px 24px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:#888;transition:all .15s}
 .tab:hover{color:#1a1a18}
 .tab.active{background:#fff;color:#1a1a18;font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .tab-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:13px;color:#888;flex-wrap:wrap}
-.tab-bar .sep{color:#ddd}
-.tab-bar strong{color:#1a1a18}
-.tab-bar .grn{color:#3B6D11;font-weight:600}
-.tab-bar .red{color:#A32D2D;font-weight:600}
-.tab-bar .amb{color:#D85A30;font-weight:600}
-
-/* ── Легенда ── */
+.tab-bar .sep{color:#ddd}.tab-bar strong{color:#1a1a18}
+.tab-bar .grn{color:#3B6D11;font-weight:600}.tab-bar .red{color:#A32D2D;font-weight:600}.tab-bar .amb{color:#D85A30;font-weight:600}
 .legend{display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
 .li{display:flex;align-items:center;gap:6px;font-size:12px;color:#888}
 .ld{width:13px;height:13px;border-radius:3px;flex-shrink:0}
-
-/* ── Карта ── */
 .plan-wrap{background:#f7f6f2;border:1px solid #e0ddd6;border-radius:14px;overflow:hidden;position:relative}
 .plan-wrap svg{display:block;width:100%;height:auto}
-
-/* ── Тултіп ── */
 .tooltip{position:absolute;background:#fff;border:1px solid #e0ddd6;border-radius:10px;padding:10px 14px;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:50;pointer-events:none;display:none;min-width:180px;max-width:250px}
 .tt-id{font-weight:600;font-size:14px;margin-bottom:2px;color:#1a1a18}
 .tt-area{font-size:11px;color:#aaa;margin-bottom:5px}
@@ -73,28 +57,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tt-badge.occupied{background:#FCEBEB;color:#791F1F}
 .tt-badge.reserved{background:#FAEEDA;color:#633806}
 .tt-name{font-size:12px;color:#888;line-height:1.5}
-
-footer{margin-top:28px;text-align:center;font-size:12px;color:#ccc;padding-bottom:20px}
-</style>
+footer{margin-top:28px;text-align:center;font-size:12px;color:#ccc;padding-bottom:20px}</style>
 </head>
 <body>
 <div class="app">
-
   <div class="top">
     <div class="top-left">
-      <img class="logo-img" id="logo-img" src="data:image/jpeg;base64,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" alt="mybox" style="display:block;height:40px;width:auto;border-radius:6px"/>
+      <img class="logo-img" src="data:image/jpeg;base64,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" alt="mybox"/>
       <div class="logo-text">my<em>box</em> — Дашборд-план</div>
     </div>
-    <div class="date-badge" id="datebadge"></div>
+    <div class="top-right">
+      <div class="date-badge" id="datebadge"></div>
+      <div class="sync-info">✓ Список охорони · 48 орендарів</div>
+    </div>
   </div>
 
   <div class="section-title">Загальна статистика — кількість боксів</div>
   <div class="total-grid" id="total-count"></div>
-
   <hr class="section-sep"/>
   <div class="section-title">Загальна статистика — площа боксів, кв.м.</div>
   <div class="total-grid-sq" id="total-area"></div>
-
   <hr class="section-sep"/>
   <div class="section-title">По локаціях</div>
   <div class="loc-stats" id="loc-stats"></div>
@@ -104,7 +86,6 @@ footer{margin-top:28px;text-align:center;font-size:12px;color:#ccc;padding-botto
     <button class="tab" onclick="switchTab('m02',this)">М-02</button>
     <button class="tab" onclick="switchTab('m03',this)">М-03</button>
   </div>
-
   <div class="tab-bar" id="tab-bar"></div>
 
   <div class="legend">
@@ -123,63 +104,57 @@ footer{margin-top:28px;text-align:center;font-size:12px;color:#ccc;padding-botto
       <div class="tt-name" id="tt-name"></div>
     </div>
   </div>
-
-  <footer>mybox.ua &copy; 2026</footer>
+  <footer>mybox.ua &copy; 2026 &middot; Дані синхронізовані з Google Sheets &laquo;Список охорони&raquo;</footer>
 </div>
-
 <script>
-// ── Дані орендарів ──
-const TM1={"К-3-46086":"Черганов В.Г.","К-3-46090":"Черганов В.Г.","М-6,5-46113":"Черганов В.Г.","М-2-46114":"Бебіх Ю.С.","N-8-46125":"Троценко О.М.","G-1-46068":"Дроншкевич Е.О.","G-1-46075":"Алфьорова Т.В.","Р-15":"Пивоваров"};
-const RM1={"G-1-46069 Резерв":true,"L-2-46112 Резерв":true};
-const TM2={"А-1-46001":"Kato Shintaro","А-1-46002":"Haywood Connor K.","А-1-46003":"Мисник Яна","А-1-46004":"Кошкін Павло","А-1-46005":"Усачов Вадим","А-1-46006":"Нікітіна Світлана","А-1-46007":"Калашник Володимир","А-1-46008":"Christian Weichselbaum","А-1-46011":"Mcewing Daren","В-2,8-46013":"Новіков Віталій","В-2,8-46014":"ФОП Вишня О.І.","В-2,8-46015":"ФОП Вишня О.І.","В-2,8-46016":"ФОП Вишня О.І.","В-2,8-46017":"Коростельов Антон","В-5,5-46018":"Зима Ірина","С-2,5-46019":"Давидов Денис","С-2,5-46020":"Коноваленко Артем","С-2,5-46022":"Олег","С-2,5-46025":"Ласкорунська Анна","С-2,5-46028":"Булигіна Олександра","С-4-46036":"Трашутін Єгор","С-3,5-46037":"Каморкіна Сніжана","D-2-46039":"Гордієнко Юрій","D-2-46040":"Кулинич Владислав","D-2-46041":"Заколенко Ольга","D-2-46042":"Алтухова Яна","D-2-46044":"Сичова Ольга","D-4-46045":"Пояркова Аліса","D-2-46046":"Литвинець Юлія","D-2-46047":"Павлюк Наталія","E-2-46049":"Губайдулліна А.","E-2-46050":"Веременко Ярослав","E-4-46051":"Мазур Ілля","E-2-46052":"Назарова Анастасія","F-4-46063":"Сенько Андрій","F-4-46064":"Андронік Віктор"};
-const RM2={};
-const TM3={"С-4-88044":"Ланда Ігор Олександрович"};
-const RM3={};
-
-// ── Парсинг площі з назви боксу ──
-// Формат: РЯДИ-ПЛОЩА-НОМЕР, де ПЛОЩА може бути "6", "2,5", "4,5" тощо
+const TENANTS={"А-1-46001": "Kato Shintaro", "А-1-46002": "Haywood Connor Kenneth", "А-1-46003": "Мисник Яна Владиславівна", "А-1-46004": "Кошкін Павло Андрійович", "А-1-46005": "Усачов Вадим Андрійович", "А-1-46006": "Нікітіна Світлана Іванівна", "А-1-46007": "Калашник Володимир Сергійович", "А-1-46008": "Christian Weichselbaum", "А-1-46011": "Mcewing Daren Brock", "В-2,8-46013": "Новіков Віталій Юрійович", "В-2,8-46014": "ФОП Вишня Оксана Іванівна", "В-2,8-46015": "ФОП Вишня Оксана Іванівна", "В-2,8-46016": "ФОП Вишня Оксана Іванівна", "В-2,8-46017": "Коростельов Антон Іванович", "В-5,5-46018": "Зима Ірина Олегівна", "С-2,5-46019": "Давидов Денис Геннадійович", "С-2,5-46020": "Коноваленко Артем Сергійович", "С-2,5-46022": "Олег", "С-2,5-46025": "Ласкорунська Анна Сергіївна", "С-2,5-46028": "Булигіна Олександра Олександрівна", "С-4-46036": "Трашутін Єгор Ігорович", "С-3,5-46037": "Каморкіна Сніжана Вікторівна", "D-2-46039": "Гордієнко Юрій Вікторович", "D-2-46040": "Кулинич Владислав Анатолійович", "D-2-46041": "Заколенко Ольга Костянтинівна", "D-2-46042": "Алтухова Яна Віталіївна", "D-2-46043": "Хавро Марина Вадимівна", "D-2-46044": "Сичова Ольга Андріївна", "D-4-46045": "Пояркова Аліса Дмитрівна", "D-2-46046": "Литвинець Юлія Василіївна", "D-2-46047": "Павлюк Наталія Олегівна", "E-2-46049": "Губайдулліна Анастасія Михайлівна", "E-2-46050": "Веременко Ярослав Олегович", "E-4-46051": "Мазур Ілля Миколайович", "E-2-46052": "Назарова Анастасія Андріївна", "F-4-46063": "Сенько Андрій Вікторович", "F-4-46064": "Андронік Віктор Миколайович", "G-1-46068": "Дроншкевич Ева Олегівна", "G-1-46075": "Алфьорова Тетяна Вікторівна", "К-3-46086": "Черганов Василь Геннадійович", "К-3-46090": "Черганов Василь Геннадійович", "М-6,5-46113": "Черганов Василь Геннадійович", "М-2-46114": "Бебіх Юлія Сергіївна", "М-2-46115": "Логвіна Влада Євгенівна", "N-8-46125": "Троценко Олена Миколаївна", "Р-15-46145": "Чередніченко Дар'я Ігорівна", "С-4-88044": "Ланда Ігор Олександрович", "F-3-88055": "Мінза Анастасія Ігорівна", "Р-15": "Чередніченко Дар'я Ігорівна"};
+const RESERVED={"G-1-46069 Резерв":true,"L-2-46112 Резерв":true};
+const DATA={
+  m01:{label:"М-01 (вул. Березова 46)",vw:980,vh:530,boxes:[{"id":"К-6-46083","x":14,"y":12,"w":68,"h":58,"svc":false},{"id":"К-3-46084","x":84,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46085","x":136,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46086","x":188,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46087","x":240,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46088","x":292,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46089","x":344,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46090","x":396,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46091","x":448,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46092","x":500,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46093","x":552,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3,5-46094","x":604,"y":12,"w":64,"h":58,"svc":false},{"id":"OFFICE","x":879,"y":9,"w":90,"h":58,"svc":true},{"id":"G-1-46076","x":15,"y":144,"w":34,"h":19,"svc":false},{"id":"G-1-46073","x":15,"y":121,"w":34,"h":19,"svc":false},{"id":"G-1-46070","x":15,"y":98,"w":34,"h":19,"svc":false},{"id":"G-1-46075","x":52,"y":144,"w":34,"h":19,"svc":false},{"id":"G-1-46072","x":51,"y":121,"w":34,"h":19,"svc":false},{"id":"G-1-46069 Резерв","x":51,"y":98,"w":34,"h":19,"svc":false},{"id":"G-1-46074","x":88,"y":144,"w":34,"h":19,"svc":false},{"id":"G-1-46071","x":88,"y":121,"w":34,"h":19,"svc":false},{"id":"G-1-46068","x":88,"y":98,"w":34,"h":19,"svc":false},{"id":"G-1-46082","x":8,"y":273,"w":34,"h":19,"svc":false},{"id":"G-1-46079","x":44,"y":273,"w":34,"h":19,"svc":false},{"id":"G-1-46081","x":8,"y":295,"w":34,"h":19,"svc":false},{"id":"G-1-46078","x":44,"y":294,"w":34,"h":19,"svc":false},{"id":"G-1-46080","x":8,"y":316,"w":34,"h":19,"svc":false},{"id":"G-1-46077","x":44,"y":317,"w":34,"h":19,"svc":false},{"id":"L-2-46095","x":188,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46096","x":228,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46097","x":268,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46098","x":308,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46099","x":348,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46100","x":388,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46101","x":428,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46102","x":468,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46103","x":508,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46104","x":548,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46105","x":588,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46106","x":628,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46107","x":668,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46108","x":708,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46109","x":748,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46110","x":788,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46111","x":828,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46112 Резерв","x":868,"y":102,"w":38,"h":52,"svc":false},{"id":"М-6,5-46113","x":188,"y":187,"w":70,"h":70,"svc":false},{"id":"М-2-46114","x":260,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46115","x":302,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46116","x":344,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46117","x":386,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46118","x":428,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46119","x":470,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46120","x":512,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46121","x":554,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46122","x":596,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46123","x":638,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2,4-46124","x":680,"y":187,"w":44,"h":70,"svc":false},{"id":"N-8-46125","x":188,"y":260,"w":72,"h":70,"svc":false},{"id":"N-3-46126","x":262,"y":260,"w":42,"h":70,"svc":false},{"id":"N-3-46127","x":306,"y":260,"w":42,"h":70,"svc":false},{"id":"N-3-46128","x":350,"y":260,"w":42,"h":70,"svc":false},{"id":"N-3-46129","x":394,"y":260,"w":42,"h":70,"svc":false},{"id":"N-3-46130","x":438,"y":260,"w":42,"h":70,"svc":false},{"id":"N-3-46131","x":482,"y":260,"w":42,"h":70,"svc":false},{"id":"N-6,2-46132","x":526,"y":260,"w":87,"h":109,"svc":false},{"id":"М-8,5-46133","x":616,"y":261,"w":107,"h":108,"svc":false},{"id":"Р-15","x":829,"y":158,"w":78,"h":208,"svc":false},{"id":"P-1-135","x":748,"y":187,"w":38,"h":28,"svc":false},{"id":"P-1-136","x":788,"y":187,"w":38,"h":28,"svc":false},{"id":"P-1-137","x":748,"y":219,"w":38,"h":28,"svc":false},{"id":"P-1-138","x":788,"y":219,"w":38,"h":28,"svc":false},{"id":"P-1-139","x":748,"y":251,"w":38,"h":28,"svc":false},{"id":"P-1-140","x":788,"y":251,"w":38,"h":28,"svc":false},{"id":"P-1-141","x":748,"y":283,"w":38,"h":28,"svc":false},{"id":"P-1-142","x":788,"y":283,"w":38,"h":28,"svc":false},{"id":"P-1-143","x":748,"y":315,"w":38,"h":28,"svc":false},{"id":"P-1-144","x":788,"y":315,"w":38,"h":28,"svc":false},{"id":"WC","x":825,"y":9,"w":52,"h":40,"svc":true},{"id":"ДУШ","x":769,"y":9,"w":52,"h":40,"svc":true},{"id":"СХОДИ","x":914,"y":82,"w":52,"h":100,"svc":true},{"id":"ВХІД","x":9,"y":224,"w":34,"h":30,"svc":true}]},
+  m02:{label:"М-02",vw:1020,vh:510,boxes:[{"id":"С-3,5-46038","x":8,"y":10,"w":54,"h":56,"svc":false},{"id":"С-3,5-46037","x":64,"y":10,"w":54,"h":56,"svc":false},{"id":"С-4-46036","x":120,"y":10,"w":58,"h":56,"svc":false},{"id":"С-2,5-46035","x":180,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46034","x":226,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46033","x":272,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46032","x":318,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46031","x":364,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46030","x":410,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46029","x":456,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46028","x":502,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46027","x":548,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46026","x":594,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46025","x":640,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46024","x":686,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46023","x":732,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46022","x":778,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46021","x":824,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46020","x":870,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46019","x":916,"y":10,"w":44,"h":56,"svc":false},{"id":"D-2-46048","x":8,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46047","x":54,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46046","x":100,"y":100,"w":44,"h":68,"svc":false},{"id":"D-4-46045","x":146,"y":100,"w":62,"h":68,"svc":false},{"id":"D-2-46044","x":210,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46043","x":256,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46042","x":366,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46041","x":412,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46040","x":458,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46039","x":504,"y":100,"w":44,"h":68,"svc":false},{"id":"E-4-46057","x":8,"y":172,"w":62,"h":68,"svc":false},{"id":"E-2-46056","x":72,"y":172,"w":44,"h":68,"svc":false},{"id":"E-2-46055","x":118,"y":172,"w":44,"h":68,"svc":false},{"id":"E-2-46054","x":164,"y":172,"w":44,"h":68,"svc":false},{"id":"E-2-46053","x":210,"y":172,"w":44,"h":68,"svc":false},{"id":"E-2-46052","x":256,"y":172,"w":44,"h":68,"svc":false},{"id":"E-4-46051","x":366,"y":172,"w":86,"h":66,"svc":false},{"id":"E-2-46050","x":455,"y":172,"w":44,"h":68,"svc":false},{"id":"E-2-46049","x":503,"y":171,"w":44,"h":68,"svc":false},{"id":"F-4,5-46058","x":8,"y":280,"w":66,"h":72,"svc":false},{"id":"F-4-46059","x":76,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46060","x":134,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46061","x":192,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46062","x":250,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46063","x":308,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46064","x":366,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46065","x":424,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46066","x":482,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4,5-46067","x":540,"y":280,"w":66,"h":72,"svc":false},{"id":"В-5,5-46018","x":680,"y":100,"w":90,"h":68,"svc":false},{"id":"В-4","x":790,"y":100,"w":70,"h":68,"svc":false},{"id":"В-2,8-46017","x":680,"y":172,"w":54,"h":56,"svc":false},{"id":"В-2,8-46016","x":736,"y":172,"w":54,"h":56,"svc":false},{"id":"В-2,8-46015","x":792,"y":172,"w":54,"h":56,"svc":false},{"id":"В-2,8-46014","x":848,"y":172,"w":54,"h":56,"svc":false},{"id":"В-2,8-46013","x":904,"y":172,"w":54,"h":56,"svc":false},{"id":"А-1-46012","x":992,"y":11,"w":18,"h":34,"svc":false},{"id":"А-1-46001","x":971,"y":12,"w":19,"h":34,"svc":false},{"id":"А-1-46009","x":971,"y":48,"w":19,"h":35,"svc":false},{"id":"А-1-46010","x":992,"y":48,"w":19,"h":35,"svc":false},{"id":"А-1-46011","x":971,"y":86,"w":19,"h":35,"svc":false},{"id":"А-1-46008","x":992,"y":86,"w":19,"h":35,"svc":false},{"id":"А-1-46007","x":971,"y":124,"w":19,"h":35,"svc":false},{"id":"А-1-46006","x":992,"y":124,"w":19,"h":35,"svc":false},{"id":"А-1-46005","x":971,"y":162,"w":19,"h":35,"svc":false},{"id":"А-1-46004","x":992,"y":162,"w":19,"h":35,"svc":false},{"id":"А-1-46003","x":971,"y":200,"w":19,"h":35,"svc":false},{"id":"А-1-46002","x":992,"y":200,"w":19,"h":35,"svc":false},{"id":"ВХІД","x":904,"y":279,"w":50,"h":72,"svc":true},{"id":"СХОДИ","x":963,"y":254,"w":49,"h":97,"svc":true}]},
+  m03:{label:"М-03",vw:980,vh:540,boxes:[{"id":"А-1-88013","x":630,"y":18,"w":33,"h":15,"svc":false},{"id":"А-1-88012","x":665,"y":18,"w":33,"h":15,"svc":false},{"id":"А-1-88011","x":700,"y":18,"w":33,"h":15,"svc":false},{"id":"А-1-88010","x":735,"y":18,"w":33,"h":15,"svc":false},{"id":"А-1-88009","x":630,"y":35,"w":33,"h":15,"svc":false},{"id":"А-1-88008","x":665,"y":35,"w":33,"h":15,"svc":false},{"id":"А-1-88007","x":700,"y":35,"w":33,"h":15,"svc":false},{"id":"А-1-88006","x":735,"y":35,"w":33,"h":15,"svc":false},{"id":"А-1-88005","x":630,"y":53,"w":33,"h":15,"svc":false},{"id":"А-1-88004","x":665,"y":52,"w":33,"h":15,"svc":false},{"id":"А-1-88003","x":699,"y":52,"w":33,"h":15,"svc":false},{"id":"А-1-88002","x":735,"y":52,"w":33,"h":15,"svc":false},{"id":"А-4,5-88001","x":773,"y":18,"w":60,"h":50,"svc":false},{"id":"F-3-88053","x":22,"y":82,"w":74,"h":92,"svc":false},{"id":"F-3-88054","x":98,"y":82,"w":74,"h":92,"svc":false},{"id":"F-3-88055","x":174,"y":82,"w":74,"h":92,"svc":false},{"id":"F-3-88056","x":22,"y":178,"w":74,"h":92,"svc":false},{"id":"F-3-88057","x":98,"y":178,"w":74,"h":92,"svc":false},{"id":"F-3-88058","x":174,"y":178,"w":74,"h":92,"svc":false},{"id":"D-2-88045","x":280,"y":82,"w":88,"h":46,"svc":false},{"id":"D-2-88046","x":280,"y":130,"w":88,"h":46,"svc":false},{"id":"D-2-88047","x":280,"y":178,"w":88,"h":46,"svc":false},{"id":"D-2-88048","x":280,"y":226,"w":88,"h":92,"svc":false},{"id":"D-2-88049","x":280,"y":320,"w":88,"h":46,"svc":false},{"id":"D-2-88050","x":280,"y":368,"w":88,"h":46,"svc":false},{"id":"D-2-88051","x":280,"y":416,"w":88,"h":46,"svc":false},{"id":"D-2-88052","x":280,"y":464,"w":88,"h":46,"svc":false},{"id":"С-2-88037","x":372,"y":82,"w":88,"h":46,"svc":false},{"id":"С-2-88038","x":372,"y":130,"w":88,"h":46,"svc":false},{"id":"С-2-88039","x":372,"y":178,"w":88,"h":46,"svc":false},{"id":"С-2-88040","x":372,"y":226,"w":88,"h":46,"svc":false},{"id":"С-2-88041","x":372,"y":274,"w":88,"h":46,"svc":false},{"id":"С-2-88042","x":372,"y":322,"w":88,"h":46,"svc":false},{"id":"С-2-88043","x":372,"y":370,"w":88,"h":46,"svc":false},{"id":"С-4-88044","x":372,"y":418,"w":88,"h":92,"svc":false},{"id":"С-2-88029","x":484,"y":82,"w":88,"h":46,"svc":false},{"id":"С-2-88030","x":484,"y":130,"w":88,"h":46,"svc":false},{"id":"С-2-88031","x":484,"y":178,"w":88,"h":46,"svc":false},{"id":"С-2-88032","x":484,"y":226,"w":88,"h":46,"svc":false},{"id":"С-2-88033","x":484,"y":274,"w":88,"h":46,"svc":false},{"id":"С-2-88034","x":485,"y":322,"w":88,"h":46,"svc":false},{"id":"С-2-88035","x":485,"y":370,"w":88,"h":46,"svc":false},{"id":"С-2-88036","x":485,"y":418,"w":88,"h":46,"svc":false},{"id":"В-2-88021","x":574,"y":82,"w":88,"h":46,"svc":false},{"id":"В-2-88022","x":574,"y":130,"w":88,"h":46,"svc":false},{"id":"В-2-88023","x":574,"y":178,"w":88,"h":46,"svc":false},{"id":"В-2-88024","x":575,"y":226,"w":88,"h":46,"svc":false},{"id":"В-2-88025","x":575,"y":274,"w":88,"h":46,"svc":false},{"id":"В-2-88026","x":576,"y":322,"w":88,"h":46,"svc":false},{"id":"В-2-88027","x":576,"y":370,"w":88,"h":46,"svc":false},{"id":"В-2-88028","x":576,"y":418,"w":88,"h":46,"svc":false},{"id":"В-2-88014","x":687,"y":82,"w":71,"h":54,"svc":false},{"id":"В-2-88015","x":686,"y":139,"w":72,"h":51,"svc":false},{"id":"В-2-88016","x":687,"y":192,"w":72,"h":53,"svc":false},{"id":"В-2-88017","x":687,"y":247,"w":72,"h":51,"svc":false},{"id":"В-2-88018","x":687,"y":300,"w":72,"h":52,"svc":false},{"id":"В-2-88019","x":688,"y":354,"w":72,"h":52,"svc":false},{"id":"В-2-88020","x":688,"y":408,"w":72,"h":55,"svc":false},{"id":"G-2,6-88059","x":22,"y":296,"w":76,"h":80,"svc":false},{"id":"G-1,5-88060","x":102,"y":296,"w":56,"h":38,"svc":false},{"id":"G-1,5-88061","x":102,"y":338,"w":56,"h":38,"svc":false},{"id":"G-6-88062","x":22,"y":378,"w":110,"h":74,"svc":false},{"id":"G-5,5-88063","x":23,"y":454,"w":229,"h":57,"svc":false},{"id":"ENTER","x":858,"y":8,"w":80,"h":60,"svc":true},{"id":"СХОДИ","x":858,"y":72,"w":80,"h":100,"svc":true},{"id":"ВХІД","x":858,"y":176,"w":80,"h":45,"svc":true}]}
+};
+let currentTab='m01';
 function parseArea(id){
-  const clean=id.replace(' Резерв','');
-  // Р-15 (без 5-значного номера)
-  const m1=clean.match(/^[А-ЯҐЄІЇA-Z]+-(\d+[\.,]?\d*)-\d{5}$/i);
-  if(m1) return parseFloat(m1[1].replace(',','.'));
-  // В-4 (тільки префікс-площа без номера)
-  const m2=clean.match(/^[А-ЯҐЄІЇa-zA-Z]+-(\d+[\.,]?\d*)$/);
-  if(m2) return parseFloat(m2[1].replace(',','.'));
-  // Р-15 (Пивоваров — дорогий великий бокс)
-  const m3=clean.match(/^[А-ЯҐЄІЇa-zA-Z]+-(\d+)$/);
-  if(m3) return parseFloat(m3[1]);
+  const c=id.replace(' Резерв','');
+  const m1=c.match(/^[А-ЯҐЄІЇa-zA-Z]+-(\d+[,\.]\d+)-\d{2,5}$/i);
+  if(m1)return parseFloat(m1[1].replace(',','.'));
+  const m2=c.match(/^[А-ЯҐЄІЇa-zA-Z]+-(\d+)-\d{2,5}$/i);
+  if(m2)return parseFloat(m2[1]);
+  const m3=c.match(/^[А-ЯҐЄІЇa-zA-Z]+-(\d+[,\.]?\d*)$/i);
+  if(m3)return parseFloat(m3[1].replace(',','.'));
   return 0;
 }
-
-const DATA={
-  m01:{label:'М-01 (вул. Березова 46)',vw:980,vh:530,tenants:TM1,reserved:RM1,boxes:[{"id":"К-6-46083","x":14,"y":12,"w":68,"h":58,"svc":false},{"id":"К-3-46084","x":84,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46085","x":136,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46086","x":188,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46087","x":240,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46088","x":292,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46089","x":344,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46090","x":396,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46091","x":448,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46092","x":500,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3-46093","x":552,"y":12,"w":50,"h":58,"svc":false},{"id":"К-3,5-46094","x":604,"y":12,"w":64,"h":58,"svc":false},{"id":"OFFICE","x":879,"y":9,"w":90,"h":58,"svc":true},{"id":"G-1-46076","x":15,"y":144,"w":34,"h":19,"svc":false},{"id":"G-1-46073","x":15,"y":121,"w":34,"h":19,"svc":false},{"id":"G-1-46070","x":15,"y":98,"w":34,"h":19,"svc":false},{"id":"G-1-46075","x":52,"y":144,"w":34,"h":19,"svc":false},{"id":"G-1-46072","x":51,"y":121,"w":34,"h":19,"svc":false},{"id":"G-1-46069 Резерв","x":51,"y":98,"w":34,"h":19,"svc":false},{"id":"G-1-46074","x":88,"y":144,"w":34,"h":19,"svc":false},{"id":"G-1-46071","x":88,"y":121,"w":34,"h":19,"svc":false},{"id":"G-1-46068","x":88,"y":98,"w":34,"h":19,"svc":false},{"id":"G-1-46082","x":8,"y":273,"w":34,"h":19,"svc":false},{"id":"G-1-46079","x":44,"y":273,"w":34,"h":19,"svc":false},{"id":"G-1-46081","x":8,"y":295,"w":34,"h":19,"svc":false},{"id":"G-1-46078","x":44,"y":294,"w":34,"h":19,"svc":false},{"id":"G-1-46080","x":8,"y":316,"w":34,"h":19,"svc":false},{"id":"G-1-46077","x":44,"y":317,"w":34,"h":19,"svc":false},{"id":"L-2-46095","x":188,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46096","x":228,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46097","x":268,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46098","x":308,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46099","x":348,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46100","x":388,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46101","x":428,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46102","x":468,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46103","x":508,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46104","x":548,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46105","x":588,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46106","x":628,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46107","x":668,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46108","x":708,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46109","x":748,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46110","x":788,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46111","x":828,"y":102,"w":38,"h":52,"svc":false},{"id":"L-2-46112 Резерв","x":868,"y":102,"w":38,"h":52,"svc":false},{"id":"М-6,5-46113","x":188,"y":187,"w":70,"h":70,"svc":false},{"id":"М-2-46114","x":260,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46115","x":302,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46116","x":344,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46117","x":386,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46118","x":428,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46119","x":470,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46120","x":512,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46121","x":554,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46122","x":596,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2-46123","x":638,"y":187,"w":40,"h":70,"svc":false},{"id":"М-2,4-46124","x":680,"y":187,"w":44,"h":70,"svc":false},{"id":"N-8-46125","x":188,"y":260,"w":72,"h":70,"svc":false},{"id":"N-3-46126","x":262,"y":260,"w":42,"h":70,"svc":false},{"id":"N-3-46127","x":306,"y":260,"w":42,"h":70,"svc":false},{"id":"N-3-46128","x":350,"y":260,"w":42,"h":70,"svc":false},{"id":"N-3-46129","x":394,"y":260,"w":42,"h":70,"svc":false},{"id":"N-3-46130","x":438,"y":260,"w":42,"h":70,"svc":false},{"id":"N-3-46131","x":482,"y":260,"w":42,"h":70,"svc":false},{"id":"N-6,2-46132","x":526,"y":260,"w":87,"h":109,"svc":false},{"id":"М-8,5-46133","x":616,"y":261,"w":107,"h":108,"svc":false},{"id":"Р-15","x":829,"y":158,"w":78,"h":208,"svc":false},{"id":"P-1-135","x":748,"y":187,"w":38,"h":28,"svc":false},{"id":"P-1-136","x":788,"y":187,"w":38,"h":28,"svc":false},{"id":"P-1-137","x":748,"y":219,"w":38,"h":28,"svc":false},{"id":"P-1-138","x":788,"y":219,"w":38,"h":28,"svc":false},{"id":"P-1-139","x":748,"y":251,"w":38,"h":28,"svc":false},{"id":"P-1-140","x":788,"y":251,"w":38,"h":28,"svc":false},{"id":"P-1-141","x":748,"y":283,"w":38,"h":28,"svc":false},{"id":"P-1-142","x":788,"y":283,"w":38,"h":28,"svc":false},{"id":"P-1-143","x":748,"y":315,"w":38,"h":28,"svc":false},{"id":"P-1-144","x":788,"y":315,"w":38,"h":28,"svc":false},{"id":"WC","x":825,"y":9,"w":52,"h":40,"svc":true},{"id":"ДУШ","x":769,"y":9,"w":52,"h":40,"svc":true},{"id":"СХОДИ","x":914,"y":82,"w":52,"h":100,"svc":true},{"id":"ВХІД","x":9,"y":224,"w":34,"h":30,"svc":true}]},
-  m02:{label:'М-02',vw:1020,vh:510,tenants:TM2,reserved:RM2,boxes:[{"id":"С-3,5-46038","x":8,"y":10,"w":54,"h":56,"svc":false},{"id":"С-3,5-46037","x":64,"y":10,"w":54,"h":56,"svc":false},{"id":"С-4-46036","x":120,"y":10,"w":58,"h":56,"svc":false},{"id":"С-2,5-46035","x":180,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46034","x":226,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46033","x":272,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46032","x":318,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46031","x":364,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46030","x":410,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46029","x":456,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46028","x":502,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46027","x":548,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46026","x":594,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46025","x":640,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46024","x":686,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46023","x":732,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46022","x":778,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46021","x":824,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46020","x":870,"y":10,"w":44,"h":56,"svc":false},{"id":"С-2,5-46019","x":916,"y":10,"w":44,"h":56,"svc":false},{"id":"D-2-46048","x":8,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46047","x":54,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46046","x":100,"y":100,"w":44,"h":68,"svc":false},{"id":"D-4-46045","x":146,"y":100,"w":62,"h":68,"svc":false},{"id":"D-2-46044","x":210,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46043","x":256,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46042","x":366,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46041","x":412,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46040","x":458,"y":100,"w":44,"h":68,"svc":false},{"id":"D-2-46039","x":504,"y":100,"w":44,"h":68,"svc":false},{"id":"E-4-46057","x":8,"y":172,"w":62,"h":68,"svc":false},{"id":"E-2-46056","x":72,"y":172,"w":44,"h":68,"svc":false},{"id":"E-2-46055","x":118,"y":172,"w":44,"h":68,"svc":false},{"id":"E-2-46054","x":164,"y":172,"w":44,"h":68,"svc":false},{"id":"E-2-46053","x":210,"y":172,"w":44,"h":68,"svc":false},{"id":"E-2-46052","x":256,"y":172,"w":44,"h":68,"svc":false},{"id":"E-4-46051","x":366,"y":172,"w":86,"h":66,"svc":false},{"id":"E-2-46050","x":455,"y":172,"w":44,"h":68,"svc":false},{"id":"E-2-46049","x":503,"y":171,"w":44,"h":68,"svc":false},{"id":"F-4,5-46058","x":8,"y":280,"w":66,"h":72,"svc":false},{"id":"F-4-46059","x":76,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46060","x":134,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46061","x":192,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46062","x":250,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46063","x":308,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46064","x":366,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46065","x":424,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4-46066","x":482,"y":280,"w":56,"h":72,"svc":false},{"id":"F-4,5-46067","x":540,"y":280,"w":66,"h":72,"svc":false},{"id":"В-5,5-46018","x":680,"y":100,"w":90,"h":68,"svc":false},{"id":"В-4","x":790,"y":100,"w":70,"h":68,"svc":false},{"id":"В-2,8-46017","x":680,"y":172,"w":54,"h":56,"svc":false},{"id":"В-2,8-46016","x":736,"y":172,"w":54,"h":56,"svc":false},{"id":"В-2,8-46015","x":792,"y":172,"w":54,"h":56,"svc":false},{"id":"В-2,8-46014","x":848,"y":172,"w":54,"h":56,"svc":false},{"id":"В-2,8-46013","x":904,"y":172,"w":54,"h":56,"svc":false},{"id":"А-1-46012","x":992,"y":11,"w":18,"h":34,"svc":false},{"id":"А-1-46001","x":971,"y":12,"w":19,"h":34,"svc":false},{"id":"А-1-46009","x":971,"y":48,"w":19,"h":35,"svc":false},{"id":"А-1-46010","x":992,"y":48,"w":19,"h":35,"svc":false},{"id":"А-1-46011","x":971,"y":86,"w":19,"h":35,"svc":false},{"id":"А-1-46008","x":992,"y":86,"w":19,"h":35,"svc":false},{"id":"А-1-46007","x":971,"y":124,"w":19,"h":35,"svc":false},{"id":"А-1-46006","x":992,"y":124,"w":19,"h":35,"svc":false},{"id":"А-1-46005","x":971,"y":162,"w":19,"h":35,"svc":false},{"id":"А-1-46004","x":992,"y":162,"w":19,"h":35,"svc":false},{"id":"А-1-46003","x":971,"y":200,"w":19,"h":35,"svc":false},{"id":"А-1-46002","x":992,"y":200,"w":19,"h":35,"svc":false},{"id":"ВХІД","x":904,"y":279,"w":50,"h":72,"svc":true},{"id":"СХОДИ","x":963,"y":254,"w":49,"h":97,"svc":true}]},
-  m03:{label:'М-03',vw:980,vh:540,tenants:TM3,reserved:RM3,boxes:[{"id":"А-1-88013","x":630,"y":18,"w":33,"h":15,"svc":false},{"id":"А-1-88012","x":665,"y":18,"w":33,"h":15,"svc":false},{"id":"А-1-88011","x":700,"y":18,"w":33,"h":15,"svc":false},{"id":"А-1-88010","x":735,"y":18,"w":33,"h":15,"svc":false},{"id":"А-1-88009","x":630,"y":35,"w":33,"h":15,"svc":false},{"id":"А-1-88008","x":665,"y":35,"w":33,"h":15,"svc":false},{"id":"А-1-88007","x":700,"y":35,"w":33,"h":15,"svc":false},{"id":"А-1-88006","x":735,"y":35,"w":33,"h":15,"svc":false},{"id":"А-1-88005","x":630,"y":53,"w":33,"h":15,"svc":false},{"id":"А-1-88004","x":665,"y":52,"w":33,"h":15,"svc":false},{"id":"А-1-88003","x":699,"y":52,"w":33,"h":15,"svc":false},{"id":"А-1-88002","x":735,"y":52,"w":33,"h":15,"svc":false},{"id":"А-4,5-88001","x":773,"y":18,"w":60,"h":50,"svc":false},{"id":"F-3-88053","x":22,"y":82,"w":74,"h":92,"svc":false},{"id":"F-3-88054","x":98,"y":82,"w":74,"h":92,"svc":false},{"id":"F-3-88055","x":174,"y":82,"w":74,"h":92,"svc":false},{"id":"F-3-88056","x":22,"y":178,"w":74,"h":92,"svc":false},{"id":"F-3-88057","x":98,"y":178,"w":74,"h":92,"svc":false},{"id":"F-3-88058","x":174,"y":178,"w":74,"h":92,"svc":false},{"id":"D-2-88045","x":280,"y":82,"w":88,"h":46,"svc":false},{"id":"D-2-88046","x":280,"y":130,"w":88,"h":46,"svc":false},{"id":"D-2-88047","x":280,"y":178,"w":88,"h":46,"svc":false},{"id":"D-2-88048","x":280,"y":226,"w":88,"h":92,"svc":false},{"id":"D-2-88049","x":280,"y":320,"w":88,"h":46,"svc":false},{"id":"D-2-88050","x":280,"y":368,"w":88,"h":46,"svc":false},{"id":"D-2-88051","x":280,"y":416,"w":88,"h":46,"svc":false},{"id":"D-2-88052","x":280,"y":464,"w":88,"h":46,"svc":false},{"id":"С-2-88037","x":372,"y":82,"w":88,"h":46,"svc":false},{"id":"С-2-88038","x":372,"y":130,"w":88,"h":46,"svc":false},{"id":"С-2-88039","x":372,"y":178,"w":88,"h":46,"svc":false},{"id":"С-2-88040","x":372,"y":226,"w":88,"h":46,"svc":false},{"id":"С-2-88041","x":372,"y":274,"w":88,"h":46,"svc":false},{"id":"С-2-88042","x":372,"y":322,"w":88,"h":46,"svc":false},{"id":"С-2-88043","x":372,"y":370,"w":88,"h":46,"svc":false},{"id":"С-4-88044","x":372,"y":418,"w":88,"h":92,"svc":false},{"id":"С-2-88029","x":484,"y":82,"w":88,"h":46,"svc":false},{"id":"С-2-88030","x":484,"y":130,"w":88,"h":46,"svc":false},{"id":"С-2-88031","x":484,"y":178,"w":88,"h":46,"svc":false},{"id":"С-2-88032","x":484,"y":226,"w":88,"h":46,"svc":false},{"id":"С-2-88033","x":484,"y":274,"w":88,"h":46,"svc":false},{"id":"С-2-88034","x":485,"y":322,"w":88,"h":46,"svc":false},{"id":"С-2-88035","x":485,"y":370,"w":88,"h":46,"svc":false},{"id":"С-2-88036","x":485,"y":418,"w":88,"h":46,"svc":false},{"id":"В-2-88021","x":574,"y":82,"w":88,"h":46,"svc":false},{"id":"В-2-88022","x":574,"y":130,"w":88,"h":46,"svc":false},{"id":"В-2-88023","x":574,"y":178,"w":88,"h":46,"svc":false},{"id":"В-2-88024","x":575,"y":226,"w":88,"h":46,"svc":false},{"id":"В-2-88025","x":575,"y":274,"w":88,"h":46,"svc":false},{"id":"В-2-88026","x":576,"y":322,"w":88,"h":46,"svc":false},{"id":"В-2-88027","x":576,"y":370,"w":88,"h":46,"svc":false},{"id":"В-2-88028","x":576,"y":418,"w":88,"h":46,"svc":false},{"id":"В-2-88014","x":687,"y":82,"w":71,"h":54,"svc":false},{"id":"В-2-88015","x":686,"y":139,"w":72,"h":51,"svc":false},{"id":"В-2-88016","x":687,"y":192,"w":72,"h":53,"svc":false},{"id":"В-2-88017","x":687,"y":247,"w":72,"h":51,"svc":false},{"id":"В-2-88018","x":687,"y":300,"w":72,"h":52,"svc":false},{"id":"В-2-88019","x":688,"y":354,"w":72,"h":52,"svc":false},{"id":"В-2-88020","x":688,"y":408,"w":72,"h":55,"svc":false},{"id":"G-2,6-88059","x":22,"y":296,"w":76,"h":80,"svc":false},{"id":"G-1,5-88060","x":102,"y":296,"w":56,"h":38,"svc":false},{"id":"G-1,5-88061","x":102,"y":338,"w":56,"h":38,"svc":false},{"id":"G-6-88062","x":22,"y":378,"w":110,"h":74,"svc":false},{"id":"G-5,5-88063","x":23,"y":454,"w":229,"h":57,"svc":false},{"id":"ENTER","x":858,"y":8,"w":80,"h":60,"svc":true},{"id":"СХОДИ","x":858,"y":72,"w":80,"h":100,"svc":true},{"id":"ВХІД","x":858,"y":176,"w":80,"h":45,"svc":true}]}
-};
-
-// ── Статистика по локації ──
+function sts(id){return TENANTS[id]?'occupied':RESERVED[id]?'reserved':'free';}
+function fc(id,svc){
+  if(svc)return{bg:'#D3D1C7',st:'#888780',tx:'#5F5E5A'};
+  const s=sts(id);
+  if(s==='occupied')return{bg:'#FCEBEB',st:'#E24B4A',tx:'#791F1F'};
+  if(s==='reserved')return{bg:'#FAEEDA',st:'#BA7517',tx:'#633806'};
+  return{bg:'#f0ece4',st:'#b8b2a6',tx:'#5F5E5A'};
+}
+function shortLabel(id){
+  const svc=['OFFICE','WC','ДУШ','СХОДИ','ВХІД','ENTER'];
+  if(svc.includes(id))return id;
+  const c=id.replace(' Резерв','');
+  const m=c.match(/^(.+?)-(\d{5})$/);if(m)return m[1]+'\n'+m[2].slice(-3);
+  const m2=c.match(/^(.+?)-(\d{2,4})$/);if(m2)return m2[1]+'\n'+m2[2];
+  return c.length>10?c.slice(0,10):c;
+}
+function fmt(n){return Number.isInteger(n)?n:n.toFixed(1);}
 function calcStats(key){
   const d=DATA[key];
-  let total=0,occ=0,res=0,free=0;
-  let sqTotal=0,sqOcc=0,sqRes=0,sqFree=0;
+  let total=0,occ=0,res=0,free=0,sqT=0,sqO=0,sqR=0,sqF=0;
   d.boxes.forEach(b=>{
-    if(b.svc)return;
-    const s=d.tenants[b.id]?'occupied':d.reserved[b.id]?'reserved':'free';
-    const sq=parseArea(b.id);
-    total++; sqTotal=Math.round((sqTotal+sq)*10)/10;
-    if(s==='occupied'){occ++;sqOcc=Math.round((sqOcc+sq)*10)/10;}
-    else if(s==='reserved'){res++;sqRes=Math.round((sqRes+sq)*10)/10;}
-    else{free++;sqFree=Math.round((sqFree+sq)*10)/10;}
+    if(b.svc)return;total++;
+    const s=sts(b.id),sq=parseArea(b.id);
+    sqT=Math.round((sqT+sq)*10)/10;
+    if(s==='occupied'){occ++;sqO=Math.round((sqO+sq)*10)/10;}
+    else if(s==='reserved'){res++;sqR=Math.round((sqR+sq)*10)/10;}
+    else{free++;sqF=Math.round((sqF+sq)*10)/10;}
   });
-  const pct=total?Math.round(occ/total*100):0;
-  const sqPct=sqTotal?Math.round(sqOcc/sqTotal*100):0;
-  return{total,occ,res,free,pct,sqTotal,sqOcc,sqRes,sqFree,sqPct};
+  return{total,occ,res,free,pct:total?Math.round(occ/total*100):0,sqT,sqO,sqR,sqF,sqPct:sqT?Math.round(sqO/sqT*100):0};
 }
-
-function fmt(n){return Number.isInteger(n)?n:n.toFixed(1);}
-
-// ── Загальна статистика (кількість) ──
 function renderTotalCount(){
   let t=0,o=0,r=0,f=0;
   ['m01','m02','m03'].forEach(k=>{const s=calcStats(k);t+=s.total;o+=s.occ;r+=s.res;f+=s.free;});
@@ -190,27 +165,17 @@ function renderTotalCount(){
     <div class="tstat"><div class="tstat-l">Вільних</div><div class="tstat-v grn">${f}</div></div>
     <div class="tstat"><div class="tstat-l">Заповненість %</div><div class="tstat-v amb">${pct}%<div class="fill-bar"><div class="fill-bar-inner" style="width:${pct}%"></div></div></div></div>`;
 }
-
-// ── Загальна статистика (площа) ──
 function renderTotalArea(){
   let sqT=0,sqO=0,sqR=0,sqF=0;
-  ['m01','m02','m03'].forEach(k=>{
-    const s=calcStats(k);
-    sqT=Math.round((sqT+s.sqTotal)*10)/10;
-    sqO=Math.round((sqO+s.sqOcc)*10)/10;
-    sqR=Math.round((sqR+s.sqRes)*10)/10;
-    sqF=Math.round((sqF+s.sqFree)*10)/10;
-  });
+  ['m01','m02','m03'].forEach(k=>{const s=calcStats(k);sqT=Math.round((sqT+s.sqT)*10)/10;sqO=Math.round((sqO+s.sqO)*10)/10;sqR=Math.round((sqR+s.sqR)*10)/10;sqF=Math.round((sqF+s.sqF)*10)/10;});
   const sqPct=sqT?Math.round(sqO/sqT*100):0;
   document.getElementById('total-area').innerHTML=`
-    <div class="tstat"><div class="tstat-l">Всього площа</div><div class="tstat-v">${fmt(sqT)} <span style="font-size:14px;font-weight:400;color:#aaa">кв.м</span></div></div>
+    <div class="tstat"><div class="tstat-l">Всього площа</div><div class="tstat-v">${fmt(sqT)} <span style="font-size:13px;font-weight:400;color:#aaa">кв.м</span></div></div>
     <div class="tstat"><div class="tstat-l">Орендовано кв.м</div><div class="tstat-v red">${fmt(sqO)}</div></div>
     <div class="tstat"><div class="tstat-l">Вільних кв.м</div><div class="tstat-v grn">${fmt(sqF)}</div></div>
     <div class="tstat"><div class="tstat-l">Резерв кв.м</div><div class="tstat-v amb">${fmt(sqR)}</div></div>
     <div class="tstat"><div class="tstat-l">Заповненість кв.м %</div><div class="tstat-v blue">${sqPct}%<div class="fill-bar"><div class="fill-bar-inner" style="width:${sqPct}%;background:#1a6fb5"></div></div></div></div>`;
 }
-
-// ── По локаціях ──
 function renderLocStats(){
   document.getElementById('loc-stats').innerHTML=['m01','m02','m03'].map(k=>{
     const s=calcStats(k);const d=DATA[k];
@@ -221,56 +186,33 @@ function renderLocStats(){
       <div class="lstat-row"><span>Вільних</span><span class="grn">${s.free}</span></div>
       <div class="lstat-row"><span>Резерв</span><span class="amb">${s.res}</span></div>
       <hr class="lstat-divider"/>
-      <div class="lstat-row"><span>Площа всього</span><span>${fmt(s.sqTotal)} кв.м</span></div>
-      <div class="lstat-row"><span>Орендовано кв.м</span><span class="red">${fmt(s.sqOcc)}</span></div>
-      <div class="lstat-row"><span>Вільних кв.м</span><span class="grn">${fmt(s.sqFree)}</span></div>
-      <div class="lstat-row"><span>Резерв кв.м</span><span class="amb">${fmt(s.sqRes)}</span></div>
+      <div class="lstat-row"><span>Площа всього</span><span>${fmt(s.sqT)} кв.м</span></div>
+      <div class="lstat-row"><span>Орендовано кв.м</span><span class="red">${fmt(s.sqO)}</span></div>
+      <div class="lstat-row"><span>Вільних кв.м</span><span class="grn">${fmt(s.sqF)}</span></div>
+      <div class="lstat-row"><span>Резерв кв.м</span><span class="amb">${fmt(s.sqR)}</span></div>
       <div class="lstat-bar"><div class="lstat-bar-inner" style="width:${s.sqPct}%"></div></div>
     </div>`;
   }).join('');
 }
-
-// ── Рядок під вкладками ──
 function renderTabBar(key){
   const s=calcStats(key);const d=DATA[key];
   document.getElementById('tab-bar').innerHTML=`
     <strong>${d.label}</strong><span class="sep">·</span>
-    Боксів: <strong>${s.total}</strong><span class="sep">·</span>
-    Орендовано: <strong class="red">${s.occ} (${fmt(s.sqOcc)} кв.м)</strong><span class="sep">·</span>
-    Вільних: <strong class="grn">${s.free} (${fmt(s.sqFree)} кв.м)</strong><span class="sep">·</span>
+    Орендовано: <strong class="red">${s.occ} (${fmt(s.sqO)} кв.м)</strong><span class="sep">·</span>
+    Вільних: <strong class="grn">${s.free} (${fmt(s.sqF)} кв.м)</strong><span class="sep">·</span>
     Заповненість: <strong class="amb">${s.pct}% / ${s.sqPct}% площі</strong>`;
 }
-
-// ── SVG ──
 const tt=document.getElementById('tt');
 const pw=document.getElementById('plan-wrap');
-
-function sts(id,t,r){return t[id]?'occupied':r[id]?'reserved':'free';}
-function fc(id,svc,t,r){
-  if(svc)return{bg:'#D3D1C7',st:'#888780',tx:'#5F5E5A'};
-  const s=sts(id,t,r);
-  if(s==='occupied')return{bg:'#FCEBEB',st:'#E24B4A',tx:'#791F1F'};
-  if(s==='reserved')return{bg:'#FAEEDA',st:'#BA7517',tx:'#633806'};
-  return{bg:'#f0ece4',st:'#b8b2a6',tx:'#5F5E5A'};
-}
-function shortLabel(id){
-  const svcIds=['OFFICE','WC','ДУШ','СХОДИ','ВХІД','ENTER'];
-  if(svcIds.includes(id))return id;
-  const c=id.replace(' Резерв','');
-  const m=c.match(/^(.+?)-(\d{5})$/);if(m)return m[1]+'\n'+m[2].slice(-3);
-  const m2=c.match(/^(.+?)-(\d{2,4})$/);if(m2)return m2[1]+'\n'+m2[2];
-  return c.length>10?c.slice(0,10):c;
-}
-
-function showTT(e,id,t,r){
-  const s=sts(id,t,r);
+function showTT(e,id){
   const sq=parseArea(id);
   document.getElementById('tt-id').textContent=id.replace(' Резерв','');
   document.getElementById('tt-area').textContent=sq>0?`Площа: ${fmt(sq)} кв.м`:'';
   const b=document.getElementById('tt-badge');
+  const s=sts(id);
   b.textContent=s==='occupied'?'Орендовано':s==='reserved'?'Резерв':'Вільний';
   b.className='tt-badge '+s;
-  document.getElementById('tt-name').textContent=t[id]||'';
+  document.getElementById('tt-name').textContent=TENANTS[id]||'';
   tt.style.display='block';moveTT(e);
 }
 function moveTT(e){
@@ -280,12 +222,10 @@ function moveTT(e){
   tt.style.left=lx+'px';tt.style.top=ly+'px';
 }
 function hideTT(){tt.style.display='none';}
-
 function buildSVG(key){
   const d=DATA[key];
   const S=document.createElementNS('http://www.w3.org/2000/svg','svg');
   S.setAttribute('viewBox',`0 0 ${d.vw} ${d.vh}`);
-  S.setAttribute('xmlns','http://www.w3.org/2000/svg');
   S.style.cssText='display:block;width:100%;height:auto';
   const br=document.createElementNS('http://www.w3.org/2000/svg','rect');
   br.setAttribute('x',0);br.setAttribute('y',0);br.setAttribute('width',d.vw);br.setAttribute('height',d.vh);
@@ -296,8 +236,9 @@ function buildSVG(key){
     g.style.cursor=b.svc?'default':'pointer';
     const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
     r.setAttribute('x',b.x);r.setAttribute('y',b.y);r.setAttribute('width',b.w);r.setAttribute('height',b.h);r.setAttribute('rx','3');
-    const f=fc(b.id,b.svc,d.tenants,d.reserved);
-    r.setAttribute('fill',f.bg);r.setAttribute('stroke',f.st);r.setAttribute('stroke-width','1');
+    const f=fc(b.id,b.svc);
+    r.setAttribute('fill',f.bg);r.setAttribute('stroke',f.st);
+    r.setAttribute('stroke-width', sts(b.id)==='occupied'?'2':'1');
     g.appendChild(r);
     const lbl=shortLabel(b.id);const lines=lbl.split('\n');
     const fs=b.w<22?5:b.w<32?6:b.w<44?7:b.w<65?8:9;
@@ -306,37 +247,33 @@ function buildSVG(key){
       const t2=document.createElementNS('http://www.w3.org/2000/svg','text');
       t2.setAttribute('x',b.x+b.w/2);t2.setAttribute('y',sy+i*lh);
       t2.setAttribute('text-anchor','middle');t2.setAttribute('font-size',fs);
-      t2.setAttribute('font-family','-apple-system,BlinkMacSystemFont,sans-serif');t2.setAttribute('font-weight','500');
+      t2.setAttribute('font-family','-apple-system,sans-serif');
+      t2.setAttribute('font-weight', sts(b.id)==='occupied'?'700':'500');
       t2.setAttribute('fill',f.tx);t2.setAttribute('pointer-events','none');
       t2.textContent=ln;g.appendChild(t2);
     });
     if(!b.svc){
-      g.addEventListener('mouseenter',e=>{r.setAttribute('stroke-width','2');showTT(e,b.id,d.tenants,d.reserved);});
+      g.addEventListener('mouseenter',e=>{r.setAttribute('stroke-width','2.5');showTT(e,b.id);});
       g.addEventListener('mousemove',e=>moveTT(e));
-      g.addEventListener('mouseleave',()=>{r.setAttribute('stroke-width','1');hideTT();});
+      g.addEventListener('mouseleave',()=>{r.setAttribute('stroke-width',sts(b.id)==='occupied'?'2':'1');hideTT();});
     }
     S.appendChild(g);
   });
   return S;
 }
-
-function switchTab(key,btn){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');hideTT();
+function rebuildSVG(key){
   const pi=document.getElementById('plan-inner');
   const old=pi.querySelector('svg');if(old)pi.removeChild(old);
   pi.appendChild(buildSVG(key));
-  renderTabBar(key);
 }
-
-// ── Ініціалізація ──
-const now=new Date();
-document.getElementById('datebadge').textContent=now.toLocaleDateString('uk-UA',{day:'numeric',month:'long',year:'numeric'});
-renderTotalCount();
-renderTotalArea();
-renderLocStats();
-renderTabBar('m01');
-document.getElementById('plan-inner').appendChild(buildSVG('m01'));
+function switchTab(key,btn){
+  currentTab=key;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');hideTT();
+  rebuildSVG(key);renderTabBar(key);
+}
+document.getElementById('datebadge').textContent=new Date().toLocaleDateString('uk-UA',{day:'numeric',month:'long',year:'numeric'});
+renderTotalCount();renderTotalArea();renderLocStats();renderTabBar('m01');rebuildSVG('m01');
 </script>
 </body>
 </html>
