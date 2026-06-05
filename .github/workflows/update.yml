@@ -1,0 +1,29 @@
+name: Update Dashboard Daily
+
+on:
+  schedule:
+    - cron: '0 17 * * *'  # 20:00 Kyiv time (UTC+3) = 17:00 UTC
+  workflow_dispatch:       # manual run button in GitHub
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Update dashboard data
+        run: python update_dashboard.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "mybox-bot"
+          git config user.email "bot@mybox.ua"
+          git add index.html
+          git diff --staged --quiet || git commit -m "Auto-update: $(date '+%d.%m.%Y %H:%M') Kyiv"
+          git push
