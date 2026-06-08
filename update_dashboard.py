@@ -1,34 +1,159 @@
-name: Update Dashboard Daily
+#!/usr/bin/env python3
+"""mybox Dashboard Auto-Updater"""
 
-on:
-  schedule:
-    - cron: '0 17 * * *'  # 20:00 Kyiv (UTC+3)
-  workflow_dispatch:       # ручний запуск кнопкою
+import csv
+import io
+import json
+import urllib.request
+from datetime import datetime, timezone, timedelta
 
-permissions:
-  contents: write          # дозвіл на запис в репо
+CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQjdYtUNfpv4ab4W3D55EWOXOnWZGhTJtTf50OqtM3K4NJdR-06YNLPG08dbQ8mUJuGLvY0dZiD7XoT/pub?gid=975946594&single=true&output=csv"
 
-jobs:
-  update:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+FALLBACK = {"A-1-46001":"Kato Shintaro","A-1-46002":"Haywood Connor Kenneth","A-1-46003":"Mисник Яна","A-1-46004":"Кошкін Павло","A-1-46005":"Усачов Вадим","A-1-46006":"Нікітіна Світлана","A-1-46007":"Калашник Володимир","A-1-46008":"Christian Weichselbaum","A-1-46011":"Mcewing Daren","В-2,8-46013":"Новіков Віталій","В-2,8-46014":"ФОП Вишня","В-2,8-46015":"ФОП Вишня","В-2,8-46016":"ФОП Вишня","В-2,8-46017":"Коростельов Антон","В-5,5-46018":"Зима Ірина","С-2,5-46019":"Давидов Денис","С-2,5-46020":"Коноваленко Артем","С-2,5-46022":"Олег","С-2,5-46025":"Ласкорунська Анна","С-2,5-46028":"Булигіна Олександра","С-4-46036":"Трашутін Єгор","С-3,5-46037":"Каморкіна Сніжана","D-2-46039":"Гордієнко Юрій","D-2-46040":"Кулинич Владислав","D-2-46041":"Заколенко Ольга","D-2-46042":"Алтухова Яна","D-2-46043":"Хавро Марина","D-2-46044":"Сичова Ольга","D-4-46045":"Пояркова Аліса","D-2-46046":"Литвинець Юлія","D-2-46047":"Павлюк Наталія","E-2-46049":"Губайдулліна Анастасія","E-2-46050":"Веременко Ярослав","E-4-46051":"Мазур Ілля","E-2-46052":"Назарова Анастасія","F-4-46063":"Сенько Андрій","F-4-46064":"Андронік Віктор","G-1-46068":"Дроншкевич Ева","G-1-46075":"Алфьорова Тетяна","К-3-46086":"Черганов Василь","К-3-46090":"Черганов Василь","М-6,5-46113":"Черганов Василь","М-2-46114":"Бебіх Юлія","М-2-46115":"Логвіна Влада","N-8-46125":"Троценко Олена","Р-15":"Чередніченко Дарья","С-4-88044":"Ланда Ігор","F-3-88055":"Мінза Анастасія"}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
 
-      - name: Update dashboard data
-        run: python update_dashboard.py
+def fetch_tenants():
+    print("Fetching Google Sheets...")
+    req = urllib.request.Request(CSV_URL, headers={"User-Agent": "mybox-bot/1.0"})
+    resp = urllib.request.urlopen(req, timeout=30)
+    text = resp.read().decode("utf-8")
+    tenants = {}
+    reader = csv.reader(io.StringIO(text))
+    rows = list(reader)
+    print("Got {} rows".format(len(rows)))
+    for row in rows[1:]:
+        if len(row) < 2:
+            continue
+        client = row[0].strip()
+        box_id = row[1].strip()
+        if box_id and client:
+            tenants[box_id] = client
+    if "Р-15-46145" in tenants:
+        tenants["Р-15"] = tenants["Р-15-46145"]
+    print("Found {} occupied boxes".format(len(tenants)))
+    return tenants
 
-      - name: Commit and push if changed
-        run: |
-          git config user.name "mybox-bot"
-          git config user.email "bot@mybox.ua"
-          git add index.html
-          git diff --staged --quiet || git commit -m "Auto-update: $(date '+%d.%m.%Y %H:%M') Kyiv"
-          git push
+
+def build_html(tenants, update_time):
+    # Read the current index.html to extract CSS and boxes
+    with open("index.html", "r", encoding="utf-8") as f:
+        current = f.read()
+
+    import re
+    css_match = re.search(r'<style>(.*?)</style>', current, re.DOTALL)
+    css = css_match.group(1) if css_match else ""
+
+    m01_match = re.search(r'm01:\{label:"[^"]*",vw:980,vh:530,boxes:(\[.*?\])\}', current, re.DOTALL)
+    m02_match = re.search(r'm02:\{label:"[^"]*",vw:1020,vh:510,boxes:(\[.*?\])\}', current, re.DOTALL)
+    m03_match = re.search(r'm03:\{label:"[^"]*",vw:980,vh:540,boxes:(\[.*?\])\}', current, re.DOTALL)
+
+    boxes_m01 = m01_match.group(1) if m01_match else "[]"
+    boxes_m02 = m02_match.group(1) if m02_match else "[]"
+    boxes_m03 = m03_match.group(1) if m03_match else "[]"
+
+    # Get logo from current file
+    logo_match = re.search(r'src="data:image/jpeg;base64,([^"]+)"', current)
+    logo = logo_match.group(1) if logo_match else ""
+
+    count = len([k for k in tenants if not k.endswith("-46145")])
+    tj = json.dumps(tenants, ensure_ascii=False)
+
+    lines = []
+    lines.append("<!DOCTYPE html>")
+    lines.append('<html lang="uk">')
+    lines.append("<head>")
+    lines.append('<meta charset="UTF-8"/>')
+    lines.append('<meta name="viewport" content="width=device-width, initial-scale=1.0"/>')
+    lines.append("<title>mybox — Дашборд-план</title>")
+    lines.append("<style>" + css + "</style>")
+    lines.append("</head>")
+    lines.append("<body>")
+    lines.append('<div class="app">')
+    lines.append('<div class="top">')
+    lines.append('<div class="top-left">')
+    lines.append('<img class="logo-img" src="data:image/jpeg;base64,' + logo + '" alt="mybox"/>')
+    lines.append('<div class="logo-text">my<em>box</em> — Дашборд-план</div>')
+    lines.append("</div>")
+    lines.append('<div class="top-right">')
+    lines.append('<div class="date-badge" id="datebadge"></div>')
+    lines.append('<div class="sync-info">✓ Оновлено ' + update_time + ' · ' + str(count) + ' орендарів</div>')
+    lines.append("</div></div>")
+    lines.append('<div class="section-title">Загальна статистика — кількість боксів</div>')
+    lines.append('<div class="total-grid" id="total-count"></div>')
+    lines.append('<hr class="section-sep"/>')
+    lines.append('<div class="section-title">Загальна статистика — площа боксів, кв.м.</div>')
+    lines.append('<div class="total-grid-sq" id="total-area"></div>')
+    lines.append('<hr class="section-sep"/>')
+    lines.append('<div class="section-title">По локаціях</div>')
+    lines.append('<div class="loc-stats" id="loc-stats"></div>')
+    lines.append('<div class="tabs">')
+    lines.append('<button class="tab active" onclick="switchTab(\'m01\',this)">М-01</button>')
+    lines.append('<button class="tab" onclick="switchTab(\'m02\',this)">М-02</button>')
+    lines.append('<button class="tab" onclick="switchTab(\'m03\',this)">М-03</button>')
+    lines.append("</div>")
+    lines.append('<div class="tab-bar" id="tab-bar"></div>')
+    lines.append('<div class="legend">')
+    lines.append('<div class="li"><div class="ld" style="background:#f0ece4;border:1px solid #c8c3b8"></div>Вільний</div>')
+    lines.append('<div class="li"><div class="ld" style="background:#F7C1C1;border:1px solid #E24B4A"></div>Орендовано</div>')
+    lines.append('<div class="li"><div class="ld" style="background:#FAC775;border:1px solid #BA7517"></div>Резерв</div>')
+    lines.append('<div class="li"><div class="ld" style="background:#D3D1C7;border:1px solid #888780"></div>Службове</div>')
+    lines.append("</div>")
+    lines.append('<div class="plan-wrap" id="plan-wrap">')
+    lines.append('<div id="plan-inner"></div>')
+    lines.append('<div class="tooltip" id="tt"><div class="tt-id" id="tt-id"></div><div class="tt-area" id="tt-area"></div><div class="tt-badge" id="tt-badge"></div><div class="tt-name" id="tt-name"></div></div>')
+    lines.append("</div>")
+    lines.append("<footer>mybox.ua &copy; 2026 &middot; Автооновлення щодня о 20:00</footer>")
+    lines.append("</div>")
+
+    js = r"""<script>
+const TENANTS=__TENANTS__;
+const RESERVED={"G-1-46069 Резерв":true,"L-2-46112 Резерв":true};
+const DATA={m01:{label:"М-01 (вул. Березова 46)",vw:980,vh:530,boxes:__M01__},m02:{label:"М-02",vw:1020,vh:510,boxes:__M02__},m03:{label:"М-03",vw:980,vh:540,boxes:__M03__}};
+let currentTab='m01';
+function parseArea(id){const c=id.replace(' Резерв','');const m1=c.match(/^[А-ЯҐЄІЇa-zA-Z]+-(\d+[,.]\d+)-\d{2,5}$/i);if(m1)return parseFloat(m1[1].replace(',','.'));const m2=c.match(/^[А-ЯҐЄІЇa-zA-Z]+-(\d+)-\d{2,5}$/i);if(m2)return parseFloat(m2[1]);const m3=c.match(/^[А-ЯҐЄІЇa-zA-Z]+-(\d+[,.]?\d*)$/i);if(m3)return parseFloat(m3[1].replace(',','.'));return 0;}
+function sts(id){return TENANTS[id]?'occupied':RESERVED[id]?'reserved':'free';}
+function fc(id,svc){if(svc)return{bg:'#D3D1C7',st:'#888780',tx:'#5F5E5A'};const s=sts(id);if(s==='occupied')return{bg:'#FCEBEB',st:'#E24B4A',tx:'#791F1F'};if(s==='reserved')return{bg:'#FAEEDA',st:'#BA7517',tx:'#633806'};return{bg:'#f0ece4',st:'#b8b2a6',tx:'#5F5E5A'};}
+function shortLabel(id){const svc=['OFFICE','WC','ДУШ','СХОДИ','ВХІД','ENTER'];if(svc.includes(id))return id;const c=id.replace(' Резерв','');const m=c.match(/^(.+?)-(\d{5})$/);if(m)return m[1]+'\\n'+m[2].slice(-3);const m2=c.match(/^(.+?)-(\d{2,4})$/);if(m2)return m2[1]+'\\n'+m2[2];return c.length>10?c.slice(0,10):c;}
+function fmt(n){return Number.isInteger(n)?n:n.toFixed(1);}
+function calcStats(key){const d=DATA[key];let total=0,occ=0,res=0,free=0,sqT=0,sqO=0,sqR=0,sqF=0;d.boxes.forEach(b=>{if(b.svc)return;total++;const s=sts(b.id),sq=parseArea(b.id);sqT=Math.round((sqT+sq)*10)/10;if(s==='occupied'){occ++;sqO=Math.round((sqO+sq)*10)/10;}else if(s==='reserved'){res++;sqR=Math.round((sqR+sq)*10)/10;}else{free++;sqF=Math.round((sqF+sq)*10)/10;}});return{total,occ,res,free,pct:total?Math.round(occ/total*100):0,sqT,sqO,sqR,sqF,sqPct:sqT?Math.round(sqO/sqT*100):0};}
+function renderTotalCount(){let t=0,o=0,r=0,f=0;['m01','m02','m03'].forEach(k=>{const s=calcStats(k);t+=s.total;o+=s.occ;r+=s.res;f+=s.free;});const pct=Math.round(o/t*100);document.getElementById('total-count').innerHTML=`<div class="tstat"><div class="tstat-l">Всього боксів</div><div class="tstat-v">${t}</div></div><div class="tstat"><div class="tstat-l">Орендовано</div><div class="tstat-v red">${o}</div></div><div class="tstat"><div class="tstat-l">Вільних</div><div class="tstat-v grn">${f}</div></div><div class="tstat"><div class="tstat-l">Заповненість %</div><div class="tstat-v amb">${pct}%<div class="fill-bar"><div class="fill-bar-inner" style="width:${pct}%"></div></div></div></div>`;}
+function renderTotalArea(){let sqT=0,sqO=0,sqR=0,sqF=0;['m01','m02','m03'].forEach(k=>{const s=calcStats(k);sqT=Math.round((sqT+s.sqT)*10)/10;sqO=Math.round((sqO+s.sqO)*10)/10;sqR=Math.round((sqR+s.sqR)*10)/10;sqF=Math.round((sqF+s.sqF)*10)/10;});const sqPct=sqT?Math.round(sqO/sqT*100):0;document.getElementById('total-area').innerHTML=`<div class="tstat"><div class="tstat-l">Всього площа</div><div class="tstat-v">${fmt(sqT)} <span style="font-size:13px;font-weight:400;color:#aaa">кв.м</span></div></div><div class="tstat"><div class="tstat-l">Орендовано кв.м</div><div class="tstat-v red">${fmt(sqO)}</div></div><div class="tstat"><div class="tstat-l">Вільних кв.м</div><div class="tstat-v grn">${fmt(sqF)}</div></div><div class="tstat"><div class="tstat-l">Резерв кв.м</div><div class="tstat-v amb">${fmt(sqR)}</div></div><div class="tstat"><div class="tstat-l">Заповненість кв.м %</div><div class="tstat-v blue">${sqPct}%<div class="fill-bar"><div class="fill-bar-inner" style="width:${sqPct}%;background:#1a6fb5"></div></div></div></div>`;}
+function renderLocStats(){document.getElementById('loc-stats').innerHTML=['m01','m02','m03'].map(k=>{const s=calcStats(k);const d=DATA[k];return`<div class="lstat"><div class="lstat-hdr"><span class="lstat-name">${d.label}</span><span class="lstat-pct">${s.pct}%</span></div><div class="lstat-row"><span>Боксів всього</span><span>${s.total}</span></div><div class="lstat-row"><span>Орендовано</span><span class="red">${s.occ}</span></div><div class="lstat-row"><span>Вільних</span><span class="grn">${s.free}</span></div><div class="lstat-row"><span>Резерв</span><span class="amb">${s.res}</span></div><hr class="lstat-divider"/><div class="lstat-row"><span>Площа всього</span><span>${fmt(s.sqT)} кв.м</span></div><div class="lstat-row"><span>Орендовано кв.м</span><span class="red">${fmt(s.sqO)}</span></div><div class="lstat-row"><span>Вільних кв.м</span><span class="grn">${fmt(s.sqF)}</span></div><div class="lstat-row"><span>Резерв кв.м</span><span class="amb">${fmt(s.sqR)}</span></div><div class="lstat-bar"><div class="lstat-bar-inner" style="width:${s.sqPct}%"></div></div></div>`;}).join('');}
+function renderTabBar(key){const s=calcStats(key);const d=DATA[key];document.getElementById('tab-bar').innerHTML=`<strong>${d.label}</strong><span class="sep">·</span>Орендовано: <strong class="red">${s.occ} (${fmt(s.sqO)} кв.м)</strong><span class="sep">·</span>Вільних: <strong class="grn">${s.free} (${fmt(s.sqF)} кв.м)</strong><span class="sep">·</span>Заповненість: <strong class="amb">${s.pct}% / ${s.sqPct}% площі</strong>`;}
+const tt=document.getElementById('tt');const pw=document.getElementById('plan-wrap');
+function showTT(e,id){const sq=parseArea(id);document.getElementById('tt-id').textContent=id.replace(' Резерв','');document.getElementById('tt-area').textContent=sq>0?`Площа: ${fmt(sq)} кв.м`:'';const b=document.getElementById('tt-badge');const s=sts(id);b.textContent=s==='occupied'?'Орендовано':s==='reserved'?'Резерв':'Вільний';b.className='tt-badge '+s;document.getElementById('tt-name').textContent=TENANTS[id]||'';tt.style.display='block';moveTT(e);}
+function moveTT(e){const rc=pw.getBoundingClientRect();let lx=e.clientX-rc.left+14,ly=e.clientY-rc.top+14;if(lx+250>rc.width)lx-=264;if(ly+100>rc.height)ly-=110;tt.style.left=lx+'px';tt.style.top=ly+'px';}
+function hideTT(){tt.style.display='none';}
+function buildSVG(key){const d=DATA[key];const S=document.createElementNS('http://www.w3.org/2000/svg','svg');S.setAttribute('viewBox',`0 0 ${d.vw} ${d.vh}`);S.style.cssText='display:block;width:100%;height:auto';const br=document.createElementNS('http://www.w3.org/2000/svg','rect');br.setAttribute('x',0);br.setAttribute('y',0);br.setAttribute('width',d.vw);br.setAttribute('height',d.vh);br.setAttribute('fill','#fff');br.setAttribute('stroke','#ccc');br.setAttribute('stroke-width','4');S.appendChild(br);d.boxes.forEach(b=>{const g=document.createElementNS('http://www.w3.org/2000/svg','g');g.style.cursor=b.svc?'default':'pointer';const r=document.createElementNS('http://www.w3.org/2000/svg','rect');r.setAttribute('x',b.x);r.setAttribute('y',b.y);r.setAttribute('width',b.w);r.setAttribute('height',b.h);r.setAttribute('rx','3');const f=fc(b.id,b.svc);r.setAttribute('fill',f.bg);r.setAttribute('stroke',f.st);r.setAttribute('stroke-width',sts(b.id)==='occupied'?'2':'1');g.appendChild(r);const lbl=shortLabel(b.id);const lines=lbl.split('\\n');const fs=b.w<22?5:b.w<32?6:b.w<44?7:b.w<65?8:9;const lh=fs*1.3,tH=lines.length*lh,sy=b.y+b.h/2-tH/2+fs*0.8;lines.forEach((ln,i)=>{const t2=document.createElementNS('http://www.w3.org/2000/svg','text');t2.setAttribute('x',b.x+b.w/2);t2.setAttribute('y',sy+i*lh);t2.setAttribute('text-anchor','middle');t2.setAttribute('font-size',fs);t2.setAttribute('font-family','-apple-system,sans-serif');t2.setAttribute('font-weight',sts(b.id)==='occupied'?'700':'500');t2.setAttribute('fill',f.tx);t2.setAttribute('pointer-events','none');t2.textContent=ln;g.appendChild(t2);});if(!b.svc){g.addEventListener('mouseenter',e=>{r.setAttribute('stroke-width','2.5');showTT(e,b.id);});g.addEventListener('mousemove',e=>moveTT(e));g.addEventListener('mouseleave',()=>{r.setAttribute('stroke-width',sts(b.id)==='occupied'?'2':'1');hideTT();});}S.appendChild(g);});return S;}
+function rebuildSVG(key){const pi=document.getElementById('plan-inner');const old=pi.querySelector('svg');if(old)pi.removeChild(old);pi.appendChild(buildSVG(key));}
+function switchTab(key,btn){currentTab=key;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');hideTT();rebuildSVG(key);renderTabBar(key);}
+document.getElementById('datebadge').textContent=new Date().toLocaleDateString('uk-UA',{day:'numeric',month:'long',year:'numeric'});
+renderTotalCount();renderTotalArea();renderLocStats();renderTabBar('m01');rebuildSVG('m01');
+</script></body></html>"""
+
+    js = js.replace("__TENANTS__", tj)
+    js = js.replace("__M01__", boxes_m01)
+    js = js.replace("__M02__", boxes_m02)
+    js = js.replace("__M03__", boxes_m03)
+
+    return "\n".join(lines) + "\n" + js
+
+
+def main():
+    kyiv = timezone(timedelta(hours=3))
+    ts = datetime.now(kyiv).strftime("%d.%m.%Y %H:%M")
+    try:
+        tenants = fetch_tenants()
+        if not tenants:
+            raise ValueError("Empty tenants")
+    except Exception as e:
+        print("Sheets error: {}, using fallback".format(e))
+        tenants = dict(FALLBACK)
+    html = build_html(tenants, ts)
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(html)
+    print("Done! {} chars".format(len(html)))
+
+
+if __name__ == "__main__":
+    main()
