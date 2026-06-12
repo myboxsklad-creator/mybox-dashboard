@@ -12,6 +12,50 @@ CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQjdYtUNfpv4ab4W3D55E
 FALLBACK = {"А-1-46001": "Kato Shintaro", "А-1-46002": "Haywood Connor Kenneth", "А-1-46003": "Мисник Яна Владиславівна", "А-1-46004": "Кошкін Павло Андрійович", "А-1-46005": "Усачов Вадим Андрійович", "А-1-46006": "Нікітіна Світлана Іванівна", "А-1-46007": "Калашник Володимир Сергійович", "А-1-46008": "Christian Weichselbaum", "А-1-46011": "Mcewing Daren Brock", "В-2,8-46013": "Новіков Віталій Юрійович", "В-2,8-46014": "ФОП Вишня Оксана Іванівна", "В-2,8-46015": "ФОП Вишня Оксана Іванівна", "В-2,8-46016": "ФОП Вишня Оксана Іванівна", "В-2,8-46017": "Коростельов Антон Іванович", "В-5,5-46018": "Зима Ірина Олегівна", "С-2,5-46019": "Давидов Денис Геннадійович", "С-2,5-46020": "Коноваленко Артем Сергійович", "С-2,5-46022": "Олег", "С-2,5-46025": "Ласкорунська Анна Сергіївна", "С-2,5-46028": "Булигіна Олександра Олександрівна", "С-4-46036": "Трашутін Єгор Ігорович", "С-3,5-46037": "Каморкіна Сніжана Вікторівна", "D-2-46039": "Гордієнко Юрій Вікторович", "D-2-46040": "Кулинич Владислав Анатолійович", "D-2-46041": "Заколенко Ольга Костянтинівна", "D-2-46042": "Алтухова Яна Віталіївна", "D-2-46043": "Хавро Марина Вадимівна", "D-2-46044": "Сичова Ольга Андріївна", "D-4-46045": "Пояркова Аліса Дмитрівна", "D-2-46046": "Литвинець Юлія Василіївна", "D-2-46047": "Павлюк Наталія Олегівна", "E-2-46049": "Губайдулліна Анастасія Михайлівна", "E-2-46050": "Веременко Ярослав Олегович", "E-4-46051": "Мазур Ілля Миколайович", "E-2-46052": "Назарова Анастасія Андріївна", "F-4-46063": "Сенько Андрій Вікторович", "F-4-46064": "Андронік Віктор Миколайович", "G-1-46068": "Дроншкевич Ева Олегівна", "G-1-46075": "Алфьорова Тетяна Вікторівна", "К-3-46086": "Черганов Василь Геннадійович", "К-3-46090": "Черганов Василь Геннадійович", "М-6,5-46113": "Черганов Василь Геннадійович", "М-2-46114": "Бебіх Юлія Сергіївна", "М-2-46115": "Логвіна Влада Євгенівна", "N-8-46125": "Троценко Олена Миколаївна", "Р-15": "Чередніченко Дар'я Ігорівна", "Р-15-46145": "Чередніченко Дар'я Ігорівна", "С-4-88044": "Ланда Ігор Олександрович", "D-4-88048": "Плахута Олександр Вікторович", "F-3-88055": "Мінза Анастасія Ігорівна", "G-6-88062": "Бакуріна Інна Олегівна"}
 
 
+def normalize_box_id(box_id):
+    """
+    Normalize box ID to match map keys.
+    Map uses Cyrillic: А В С К М Р Н
+    Map uses Latin:    D E F G L N P
+    Google Sheets CSV may return wrong charset - fix it here.
+    """
+    if not box_id:
+        return box_id
+    # Mapping: Latin -> Cyrillic (for letters that should be Cyrillic in our map)
+    cyr_map = {
+        # Latin A -> Cyrillic А (only for А-1-46xxx and А-4-88xxx boxes)
+        # Latin B -> Cyrillic В
+        # Latin C -> Cyrillic С
+        # Latin K -> Cyrillic К
+        # Latin M -> Cyrillic М
+        # Latin P -> Cyrillic Р (only for Р-15)
+    }
+    first = box_id[0]
+    first_ord = ord(first)
+
+    # Latin A (65) -> Cyrillic А (1040) - boxes А-1-46xxx, А-4-88xxx
+    if first_ord == 65:  # Latin A
+        return 'А' + box_id[1:]
+    # Latin B (66) -> Cyrillic В - boxes В-2,8-46xxx, В-5,5-46018
+    if first_ord == 66:  # Latin B
+        return 'В' + box_id[1:]
+    # Latin C (67) -> Cyrillic С - boxes С-2,5-46xxx, С-4-46xxx, С-3,5-46xxx
+    if first_ord == 67:  # Latin C
+        return 'С' + box_id[1:]
+    # Latin K (75) -> Cyrillic К - boxes К-3-46xxx, К-6-46xxx
+    if first_ord == 75:  # Latin K
+        return 'К' + box_id[1:]
+    # Latin M (77) -> Cyrillic М - boxes М-2-46xxx, М-6,5-46113
+    if first_ord == 77:  # Latin M
+        return 'М' + box_id[1:]
+    # Latin P (80) -> Cyrillic Р - box Р-15
+    if first_ord == 80 and box_id.startswith('P-15'):
+        return 'Р' + box_id[1:]
+    # Latin H (72) -> Cyrillic Н - if any
+    # D(68), E(69), F(70), G(71), L(76), N(78) stay Latin - correct for our map
+    return box_id
+
+
 def fetch_tenants():
     print("Fetching Google Sheets...")
     req = urllib.request.Request(CSV_URL, headers={"User-Agent": "mybox-bot/1.0"})
@@ -25,9 +69,10 @@ def fetch_tenants():
         if len(row) < 2:
             continue
         client = row[0].strip()
-        box_id = row[1].strip()
+        box_id = normalize_box_id(row[1].strip())
         if box_id and client:
             tenants[box_id] = client
+    # Alias for Р-15
     if "Р-15-46145" in tenants:
         tenants["Р-15"] = tenants["Р-15-46145"]
     print("Found {} occupied boxes".format(len(tenants)))
