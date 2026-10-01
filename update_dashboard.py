@@ -1,90 +1,66 @@
 #!/usr/bin/env python3
 """mybox Dashboard Auto-Updater"""
 
-import csv
-import io
 import json
+import os
+import re
 import urllib.request
 from datetime import datetime, timezone, timedelta
 
-CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQjdYtUNfpv4ab4W3D55EWOXOnWZGhTJtTf50OqtM3K4NJdR-06YNLPG08dbQ8mUJuGLvY0dZiD7XoT/pub?gid=975946594&single=true&output=csv"
+API_URL = os.environ.get("MYBOX_API_URL", "https://137-184-128-215.sslip.io/api/public/boxmap")
+API_TOKEN = os.environ.get("MYBOX_PUBLIC_TOKEN", "")
 
-MANUAL_RESERVED = ["G-1-46069", "К-3,5-46094", "L-2-46112", "В-4"]
-
-FALLBACK = {"А-1-46001": "Kato Shintaro", "А-1-46002": "Haywood Connor Kenneth", "А-1-46003": "Мисник Яна Владиславівна", "А-1-46004": "Кошкін Павло Андрійович", "А-1-46005": "Усачов Вадим Андрійович / Надольна Ольга Костянтинівна", "А-1-46006": "Нікітіна Світлана Іванівна", "А-1-46007": "Шибаєв Владислав Сергійович", "А-1-46008": "Christian Weichselbaum", "А-1-46011": "Mcewing Daren Brock", "В-2,8-46013": "Заєць Тетяна Вікторівна", "В-2,8-46014": "ФОП Вишня Оксана Іванівна", "В-2,8-46015": "ФОП Вишня Оксана Іванівна", "В-2,8-46016": "ФОП Вишня Оксана Іванівна", "В-2,8-46017": "Коростельов Антон Іванович", "В-5,5-46018": "Зима Ірина Олегівна", "С-2,5-46019": "Давидов Денис Геннадійович", "С-2,5-46020": "Коноваленко Артем Сергійович", "С-2,5-46023": "Цеомашко Анастасія Сергіївна", "С-2,5-46024": "Жеглова Наталія Олексіївна", "С-2,5-46025": "Ласкорунська Анна Сергіївна", "С-2,5-46028": "Булигіна Олександра Олександрівна", "С-2,5-46035": "Литвинець Юлія Василіївна", "С-4-46036": "Трашутін Єгор Ігорович", "С-3,5-46037": "Каморкіна Сніжана Вікторівна", "D-2-46039": "Гордієнко Юрій Вікторович", "D-2-46040": "Рабазулькін Олександр Олегович", "D-2-46041": "Заколенко Ольга Костянтинівна", "D-2-46042": "Алтухова Яна Віталіївна", "D-2-46043": "Хавро Марина Вадимівна", "D-2-46044": "Гаптар Тарас Володимирович", "D-4-46045": "Пояркова Аліса Дмитрівна", "D-2-46046": "Корчук Максим Ігорович", "D-2-46047": "Павлюк Наталія Олегівна", "D-2-46048": "Бутенко Зоя Павлівна", "E-2-46049": "Губайдулліна Анастасія Михайлівна", "E-2-46050": "Веременко Ярослав Олегович", "E-4-46051": "Мазур Ілля Миколайович", "E-2-46053": "Чаплик Марія Ігорівна", "E-2-46054": "Омельченко Максим Геннадійович", "E-2-46055": "Вялова Анна Олександрівна", "E-2-46056": "Гаспарян Вікторія Юріївна", "E-4-46057": "Гайкалова Наталія Володимирівна", "F-4,5-46058": "Ступак Маргарита Дмитрівна", "F-4-46059": "Zamora Gustavo", "F-4-46060": "Коваленков Павло Сергійович", "F-4-46061": "Андронік Віктор Миколайович", "F-4-46062": "Сенько Андрій Вікторович", "F-4-46063": "Галич Ігор Ярославович", "F-4-46064": "Мамедов Фарід Мушфигович", "F-4-46065": "Яковина Софія Денисівна", "F-4-46066": "Плясунова Валерія Сергіївна", "F-4,5-46067": "Плясунова Валерія Сергіївна", "G-1-46068": "Дроншкевич Ева Олегівна", "G-1-46071": "Клинько Марія", "G-1-46075": "Алфьорова Тетяна Вікторівна", "К-6-46083": "Бугрик Іван Анатолійович", "К-3-46084": "Вихристюк Поліна Дмитрівна", "К-3-46085": "Новак Дмитро Ігорович", "К-3-46086": "Черганов Василь Геннадійович", "К-3-46087": "Міфтахутдінов Владислав Сергійович", "К-3-46088": "АДВОКАТСЬКЕ ОБ’ЄДНАННЯ «ЕКВО»", "К-3-46089": "АДВОКАТСЬКЕ ОБ’ЄДНАННЯ «ЕКВО»", "К-3-46090": "Черганов Василь Геннадійович", "L-2-46095": "Андрейцева Ольга Василівна", "М-6,5-46113": "Черганов Василь Геннадійович", "М-2-46114": "Бебіх Юлія Сергіївна", "М-2-46115": "Логвіна Влада Євгенівна", "М-2-46116": "Таран Віктор Григорович", "М-2-46117": "Водяник Тетяна Леонідівна", "N-8-46125": "Троценко Олена Миколаївна", "N-3-46126": "Кулібаба Олександр Сергійович", "N-3-46127": "Умаєв Бадрудін Бєсланович", "N-3-46128": "Мельниченко Катерина Анатоліївна", "N-6,2-46132": "АТ \"ХК \" УКРСПЕЦТЕХНІКА\"", "М-8,5-46133": "Яцура Павло Павлович", "Р-15-46145": "Чередніченко Дар'я Ігорівна", "А-4,5-88001": "Троценко Олена Миколаївна", "А-1-88002": "Калюжний Борис Олексійович", "А-1-88004": "Писанець Максим Олексійович", "А-1-88006": "Кішець Анна Анатоліївна", "А-1-88007": "Гарбар Сергій Володимирович", "А-1-88008": "Попадин Юлія Сергіївна", "А-1-88009": "Луна Джеремі Річард", "В-2-88014": "Павліченко Дмитро Миколайович", "В-2-88015": "Другашова Ірина Ігорівна", "В-2-88016": "Дворецький Олексій Владиславович", "В-2-88017": "Смичков Олексій Олегович", "В-2-88018": "Бувайло Денис Олександрович", "В-2-88019": "Рябцева Тетяна Геннадіївна", "В-2-88020": "Коваль Дмитро Юрійович", "В-2-88021": "Шпакова Олена Юріївна", "В-2-88023": "Кобернюк Наталія Вікторівна", "В-2-88024": "Паращук Юлія Володимирівна", "В-2-88025": "Залевський Валерій Миколайович", "В-2-88026": "Залевський Валерій Миколайович", "В-2-88027": "Капущак Валентин Володимирович", "В-2-88028": "Карпунов Анатолій Костянтинович", "С-2-88029": "Біневська Надія Володимирівна", "С-2-88030": "Шарай Олег Вадимович", "С-2-88031": "Повстяний Ярослав Юрійович", "С-2-88037": "Новітня Наталія Дмитрівна", "С-2-88039": "Дворцов Владислав Ігорович", "С-4-88044": "Ланда Ігор Олександрович", "D-4-88048": "Плахута Олександр Вікторович", "D-2-88049": "Момот Михайло Ігорович", "F-3-88053": "Денисюк Юрій Васильович", "F-3-88054": "Малина Ірина Петрівна", "F-3-88055": "Дубовик Вадим Олександрович", "F-3-88056": "Лемешко Артем Тарасович", "F-3-88057": "Прокопчук Олександр Сергійович", "F-3-88058": "\"ДАТА САЄНС ЮА ТЕКНОЛОДЖІС\"", "G-2,6-88059": "Виноградова Ольга Євгенівна", "G-1,5-88061": "Балмер Єлизавета Леонідівна", "G-6-88062": "Стеценко Олексій Геннадійович", "G-6-88063": "Волчков Олексій Сергійович"}
-
-
-def normalize_box_id(box_id):
-    """
-    Normalize box ID to match map keys.
-    Map uses Cyrillic: А В С К М Р Н
-    Map uses Latin:    D E F G L N P
-    Google Sheets CSV may return wrong charset - fix it here.
-    """
-    if not box_id:
-        return box_id
-    # Mapping: Latin -> Cyrillic (for letters that should be Cyrillic in our map)
-    cyr_map = {
-        # Latin A -> Cyrillic А (only for А-1-46xxx and А-4-88xxx boxes)
-        # Latin B -> Cyrillic В
-        # Latin C -> Cyrillic С
-        # Latin K -> Cyrillic К
-        # Latin M -> Cyrillic М
-        # Latin P -> Cyrillic Р (only for Р-15)
-    }
-    first = box_id[0]
-    first_ord = ord(first)
-
-    # Latin A (65) -> Cyrillic А (1040) - boxes А-1-46xxx, А-4-88xxx
-    if first_ord == 65:  # Latin A
-        return 'А' + box_id[1:]
-    # Latin B (66) -> Cyrillic В - boxes В-2,8-46xxx, В-5,5-46018
-    if first_ord == 66:  # Latin B
-        return 'В' + box_id[1:]
-    # Latin C (67) -> Cyrillic С - boxes С-2,5-46xxx, С-4-46xxx, С-3,5-46xxx
-    if first_ord == 67:  # Latin C
-        return 'С' + box_id[1:]
-    # Latin K (75) -> Cyrillic К - boxes К-3-46xxx, К-6-46xxx
-    if first_ord == 75:  # Latin K
-        return 'К' + box_id[1:]
-    # Latin M (77) -> Cyrillic М - boxes М-2-46xxx, М-6,5-46113
-    if first_ord == 77:  # Latin M
-        return 'М' + box_id[1:]
-    # Latin P (80) -> Cyrillic Р - box Р-15
-    if first_ord == 80 and box_id.startswith('P-15'):
-        return 'Р' + box_id[1:]
-    # Latin H (72) -> Cyrillic Н - if any
-    # D(68), E(69), F(70), G(71), L(76), N(78) stay Latin - correct for our map
-    return box_id
+# Бокси, у яких на схемі index.html номер не 5-значний: ID на схемі → інвентарний номер у «Схемах»/CRM
+ALIASES = {"В-4": 46149}
+MANUAL_RESERVED = ["В-4"]  # на «Схемах» В-4-46149 білий; прибрати, коли зафарбують жовтим
 
 
-def fetch_tenants():
-    print("Fetching Google Sheets...")
-    req = urllib.request.Request(CSV_URL, headers={"User-Agent": "mybox-bot/1.0"})
-    resp = urllib.request.urlopen(req, timeout=30)
-    text = resp.read().decode("utf-8")
-    tenants = {}
-    reserved = {}
-    reader = csv.reader(io.StringIO(text))
-    rows = list(reader)
-    print("Got {} rows".format(len(rows)))
-    for row in rows[1:]:
-        if len(row) < 2:
+def map_box_ids():
+    """Інвентарний номер (5 цифр) → ID боксу так, як він записаний на схемі в index.html.
+    Зіставлення по номеру прибирає проблему латиниця/кирилиця і аліаси типу «Р-15»."""
+    with open("index.html", "r", encoding="utf-8") as f:
+        html = f.read()
+    ids = {}
+    for box_id in re.findall(r'"id":"([^"]+)"', html):
+        clean = box_id.replace(" Резерв", "")
+        m = re.search(r"-(\d{5})$", clean)
+        m3 = re.search(r"^P-[\d,.]+-(\d{3})$", clean)  # P-1,5-135 → 46135
+        if m:
+            ids[int(m.group(1))] = box_id
+        elif m3:
+            ids[46000 + int(m3.group(1))] = box_id
+    for box_id, num in ALIASES.items():
+        ids.setdefault(num, box_id)
+    return ids
+
+
+def fetch_statuses():
+    """Статуси боксів з сервера MYBOX: «орендовано» = активний договір в OneBox CRM,
+    «резерв» = жовтий колір на схемі. Імена орендарів НЕ передаються."""
+    if not API_TOKEN:
+        raise RuntimeError("немає MYBOX_PUBLIC_TOKEN (GitHub → Settings → Secrets)")
+    req = urllib.request.Request(API_URL, headers={"X-Token": API_TOKEN, "User-Agent": "mybox-bot/2.0"})
+    data = json.loads(urllib.request.urlopen(req, timeout=60).read().decode("utf-8"))
+    boxes = data.get("boxes") or []
+    if len(boxes) < 100:
+        raise RuntimeError("сервер повернув замало боксів: {}".format(len(boxes)))
+    ids = map_box_ids()
+    tenants, reserved, missing = {}, {}, []
+    for b in boxes:
+        box_id = ids.get(int(b["num"]))
+        if not box_id:
+            missing.append(b["code"])
             continue
-        client = row[0].strip()
-        box_id = normalize_box_id(row[1].strip())
-        if not box_id or not client:
-            continue
-        # "Резерв" in client column = reserved box (yellow, not counted as occupied)
-        if client.lower() == "резерв":
+        if b["status"] == "rented":
+            tenants[box_id] = "Орендовано"
+        elif b["status"] == "reserve":
             reserved[box_id] = True
-        else:
-            tenants[box_id] = client
-    # Always include manually-set reserved boxes
     for rb in MANUAL_RESERVED:
         if rb not in tenants:
             reserved[rb] = True
-    print("Found {} occupied, {} reserved".format(len(tenants), len(reserved)))
+    if missing:
+        print("Немає на схемі index.html: " + ", ".join(missing))
+    print("Сервер {}: орендовано {}, резерв {}".format(data.get("generated"), len(tenants), len(reserved)))
     return tenants, reserved
 
 
@@ -109,7 +85,7 @@ def build_html(tenants, reserved, update_time):
     logo_match = re.search(r'src="data:image/jpeg;base64,([^"]+)"', current)
     logo = logo_match.group(1) if logo_match else ""
 
-    count = len([k for k in tenants if not k.endswith("-46145")])
+    count = len(tenants)
     tj = json.dumps(tenants, ensure_ascii=False)
 
     lines = []
@@ -130,7 +106,7 @@ def build_html(tenants, reserved, update_time):
     lines.append("</div>")
     lines.append('<div class="top-right">')
     lines.append('<div class="date-badge" id="datebadge"></div>')
-    lines.append('<div class="sync-info">✓ Оновлено ' + update_time + ' · ' + str(count) + ' орендарів</div>')
+    lines.append('<div class="sync-info">✓ Оновлено ' + update_time + ' · ' + str(count) + ' орендованих боксів · дані OneBox CRM</div>')
     lines.append("</div></div>")
     lines.append('<div class="section-title">Загальна статистика — кількість боксів</div>')
     lines.append('<div class="total-grid" id="total-count"></div>')
@@ -197,14 +173,8 @@ renderTotalCount();renderTotalArea();renderLocStats();renderTabBar('m01');rebuil
 def main():
     kyiv = timezone(timedelta(hours=3))
     ts = datetime.now(kyiv).strftime("%d.%m.%Y %H:%M")
-    try:
-        tenants, reserved = fetch_tenants()
-        if not tenants:
-            raise ValueError("Empty tenants")
-    except Exception as e:
-        print("Sheets error: {}, using fallback".format(e))
-        tenants = dict(FALLBACK)
-        reserved = {rb: True for rb in MANUAL_RESERVED}
+    # Якщо сервер недоступний — index.html НЕ змінюємо (лишається вчорашня версія), workflow падає з помилкою
+    tenants, reserved = fetch_statuses()
     html = build_html(tenants, reserved, ts)
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
