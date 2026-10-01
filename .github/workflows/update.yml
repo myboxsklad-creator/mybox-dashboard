@@ -2,7 +2,7 @@ name: Update Dashboard Daily
 
 on:
   schedule:
-    - cron: '0 17 * * *'  # 20:00 Kyiv time (UTC+3) = 17:00 UTC
+    - cron: '30 17 * * *'  # 20:30 Kyiv (UTC+3): після перерахунку на сервері MYBOX о 20:00
   workflow_dispatch:       # manual run button in GitHub
 
 jobs:
@@ -18,6 +18,8 @@ jobs:
           python-version: '3.11'
 
       - name: Update dashboard data
+        env:
+          MYBOX_PUBLIC_TOKEN: ${{ secrets.MYBOX_PUBLIC_TOKEN }}
         run: python update_dashboard.py
 
       - name: Commit and push if changed
