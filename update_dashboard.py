@@ -106,7 +106,7 @@ def build_html(tenants, reserved, update_time):
     lines.append("</div>")
     lines.append('<div class="top-right">')
     lines.append('<div class="date-badge" id="datebadge"></div>')
-    lines.append('<div class="sync-info">✓ Оновлено ' + update_time + ' · ' + str(count) + ' орендованих боксів · дані OneBox CRM</div>')
+    lines.append('<div class="sync-info">✓ Оновлено ' + update_time + ' · ' + str(count) + ' орендованих боксів · обмін даними: OneBox CRM → сервер MYBOX</div>')
     lines.append("</div></div>")
     lines.append('<div class="section-title">Загальна статистика — кількість боксів</div>')
     lines.append('<div class="total-grid" id="total-count"></div>')
