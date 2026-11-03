@@ -171,8 +171,8 @@ renderTotalCount();renderTotalArea();renderLocStats();renderTabBar('m01');rebuil
 
 
 def main():
-    kyiv = timezone(timedelta(hours=3))
-    ts = datetime.now(kyiv).strftime("%d.%m.%Y %H:%M")
+    from zoneinfo import ZoneInfo
+    ts = datetime.now(ZoneInfo("Europe/Kyiv")).strftime("%d.%m.%Y %H:%M")  # з урахуванням зимового/літнього часу
     # Якщо сервер недоступний — index.html НЕ змінюємо (лишається вчорашня версія), workflow падає з помилкою
     tenants, reserved = fetch_statuses()
     html = build_html(tenants, reserved, ts)
